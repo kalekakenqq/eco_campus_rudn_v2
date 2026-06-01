@@ -72,6 +72,15 @@
   .top-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 13px; background: var(--green-pale); border-radius: 9px; font-size: 13px; }
   .top-count { font-family: var(--mono); font-weight: 500; color: var(--green-main); }
   .error-msg { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 13px; color: #dc2626; font-size: 13px; margin-top: 12px; display: none; }
+  .classify-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--green-border); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); resize: vertical; min-height: 80px; transition: border-color 0.15s; }
+  .classify-input:focus { outline: none; border-color: var(--green-light); }
+  .classify-result { background: var(--green-pale); border-radius: 12px; padding: 16px 18px; margin-top: 16px; display: none; }
+  .classify-type { font-size: 20px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+  .classify-confidence { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .classify-bar-wrap { background: rgba(30,107,60,0.1); border-radius: 20px; height: 6px; margin-bottom: 12px; }
+  .classify-bar { background: var(--green-main); height: 6px; border-radius: 20px; transition: width 0.4s ease; }
+  .classify-keywords { display: flex; flex-wrap: wrap; gap: 4px; }
+  .keyword { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: white; color: var(--green-main); font-weight: 500; border: 1px solid var(--green-border); }
   footer { text-align: center; padding: 28px 0 40px; font-size: 11px; color: var(--muted); font-family: var(--mono); }
 </style>
 </head>
@@ -93,6 +102,7 @@
       <button class="tab active" onclick="switchTab('route', this)">Маршрут</button>
       <button class="tab" onclick="switchTab('points', this)">Экопункты</button>
       <button class="tab" onclick="switchTab('stats', this)">Статистика</button>
+      <button class="tab" onclick="switchTab('classify', this)">Определить тип</button>
     </div>
 
     <div class="tab-pane active" id="tab-route">
@@ -146,6 +156,21 @@
       </ul>
       <button class="btn btn-outline" onclick="loadStats()">Обновить</button>
     </div>
+  <div class="tab-pane" id="tab-classify">
+      <div class="section-label">Определить тип отходов по описанию</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Опишите предмет своими словами — система определит, в какой контейнер его нести.</p>
+      <textarea class="classify-input" id="classify-input" placeholder="Например: старый телефон, пластиковая бутылка, газета..."></textarea>
+      <button class="btn" style="margin-top:12px" onclick="classifyWaste()">
+        <span id="classify-label">Определить тип</span>
+        <div class="spinner" id="classify-spinner"></div>
+      </button>
+      <div class="classify-result" id="classify-result">
+        <div class="classify-type" id="c-type"></div>
+        <div class="classify-confidence" id="c-conf"></div>
+        <div class="classify-bar-wrap"><div class="classify-bar" id="c-bar"></div></div>
+        <div class="classify-keywords" id="c-keywords"></div>
+      </div>
+    </div>
   </div>
 
   <div class="result-box" id="result">
@@ -157,7 +182,7 @@
     </div>
   </div>
 
-  <footer>EcoCampus РУДН v2.0 &nbsp;·&nbsp; Алгоритм Дейкстры &nbsp;·&nbsp; NetworkX &nbsp;·&nbsp; FastAPI</footer>
+  <footer>EcoCampus РУДН v3.0 &nbsp;·&nbsp; Алгоритм Дейкстры &nbsp;·&nbsp; NetworkX &nbsp;·&nbsp; FastAPI</footer>
 </div>
 <script>
 const API = 'http://127.0.0.1:8000';
@@ -284,6 +309,34 @@ function switchTab(name, el) {
   el.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'stats') loadStats();
+}
+
+async function classifyWaste() {
+  const text = document.getElementById('classify-input').value.trim();
+  if (!text) return;
+  const label = document.getElementById('classify-label');
+  const spinner = document.getElementById('classify-spinner');
+  label.textContent = 'Анализ...';
+  spinner.style.display = 'block';
+  document.getElementById('classify-result').style.display = 'none';
+  try {
+    const res = await fetch(API + '/classify?text=' + encodeURIComponent(text));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Ошибка');
+    document.getElementById('c-type').textContent = data.waste_type;
+    const pct = Math.round(data.confidence * 100);
+    document.getElementById('c-conf').textContent = 'Уверенность: ' + pct + '%' + (data.is_confident ? '' : ' — недостаточно для точного определения');
+    document.getElementById('c-bar').style.width = pct + '%';
+    document.getElementById('c-keywords').innerHTML = data.matched_keywords.length
+      ? data.matched_keywords.map(k => '<span class="keyword">' + k + '</span>').join('')
+      : '<span style="font-size:13px;color:var(--muted)">Ключевые слова не найдены</span>';
+    document.getElementById('classify-result').style.display = 'block';
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    label.textContent = 'Определить тип';
+    spinner.style.display = 'none';
+  }
 }
 
 init();

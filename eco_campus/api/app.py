@@ -255,3 +255,43 @@ def get_eco_tip(
             detail=f"Неизвестный тип отходов: {waste_type!r}",
         )
     return {"waste_type": wt.label(), "tip": get_tip(wt)}
+
+
+from eco_campus.core.classifier import classifier as waste_classifier
+
+
+class ClassifyRequest(BaseModel):
+    text: str
+
+
+class ClassifyOut(BaseModel):
+    waste_type: str
+    waste_type_value: str
+    confidence: float
+    matched_keywords: list[str]
+    is_confident: bool
+
+
+@app.get("/classify", response_model=ClassifyOut, tags=["ai"])
+def classify_waste(
+    text: str = Query(..., description="Текстовое описание предмета"),
+) -> ClassifyOut:
+    """
+    Определяет тип отходов по текстовому описанию.
+
+    Использует алгоритм классификации на основе взвешенного
+    совпадения ключевых слов (TF-IDF-подобный подход).
+    """
+    from eco_campus.core.exceptions import ClassificationError
+    try:
+        result = waste_classifier.classify(text)
+    except ClassificationError as exc:
+        raise HTTPException(status_code=422, detail=exc.message) from exc
+
+    return ClassifyOut(
+        waste_type=result.waste_type.label(),
+        waste_type_value=result.waste_type.value,
+        confidence=result.confidence,
+        matched_keywords=result.matched_keywords,
+        is_confident=result.is_confident(),
+    )
