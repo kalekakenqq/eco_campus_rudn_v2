@@ -2,9 +2,11 @@
 REST API для сервиса эко-логистики кампуса РУДН.
 
 Предоставляет эндпоинты для получения локаций, типов отходов,
-списка контейнеров, построения маршрута, статистики и эко-советов.
+списка контейнеров, построения маршрута, статистики, эко-советов,
+классификации отходов по тексту и генерации QR-кода.
 """
 
+import io
 import threading
 import time
 import webbrowser
@@ -12,14 +14,17 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
+import qrcode
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from eco_campus.core.classifier import classifier as waste_classifier
 from eco_campus.core.eco_tips import get_tip
 from eco_campus.core.exceptions import (
+    ClassificationError,
     ContainerNotFoundError,
     EcoCampusError,
     InvalidWasteTypeError,
@@ -56,7 +61,7 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
 app = FastAPI(
     title="EcoCampus РУДН",
     description="Интеллектуальная навигация по экопунктам кампуса РУДН",
-    version="2.0.0",
+    version="4.0.0",
     lifespan=lifespan,
 )
 
@@ -106,6 +111,14 @@ class LocationOut(BaseModel):
     lon: float | None
 
 
+class ClassifyOut(BaseModel):
+    waste_type: str
+    waste_type_value: str
+    confidence: float
+    matched_keywords: list[str]
+    is_confident: bool
+
+
 def _get_router() -> CampusRouter:
     if _router is None:
         raise HTTPException(status_code=503, detail="Сервис маршрутизации не готов")
@@ -134,7 +147,7 @@ def root() -> FileResponse:
 def api_info() -> dict[str, str]:
     return {
         "service": "EcoCampus РУДН",
-        "version": "2.0.0",
+        "version": "4.0.0",
         "description": "Интеллектуальная навигация к экопунктам кампуса",
         "docs": "/docs",
     }
@@ -210,7 +223,6 @@ def get_route(
         raise HTTPException(status_code=500, detail=exc.message) from exc
 
     stats_service.record_route(wt.label(), from_location)
-    eco_tip = get_tip(wt)
 
     return RouteOut(
         container=_container_to_out(route.target_container),
@@ -227,18 +239,13 @@ def get_route(
         total_distance_meters=route.total_distance_meters,
         estimated_minutes=route.estimated_minutes,
         summary=route.summary(),
-        eco_tip=eco_tip,
+        eco_tip=get_tip(wt),
     )
 
 
 @app.get("/stats", tags=["analytics"])
 def get_stats() -> dict:
-    """
-    Возвращает статистику использования сервиса.
-
-    Показывает общее количество маршрутов, время работы
-    и наиболее популярные типы отходов и локации.
-    """
+    """Возвращает статистику использования сервиса."""
     return stats_service.summary()
 
 
@@ -257,21 +264,6 @@ def get_eco_tip(
     return {"waste_type": wt.label(), "tip": get_tip(wt)}
 
 
-from eco_campus.core.classifier import classifier as waste_classifier
-
-
-class ClassifyRequest(BaseModel):
-    text: str
-
-
-class ClassifyOut(BaseModel):
-    waste_type: str
-    waste_type_value: str
-    confidence: float
-    matched_keywords: list[str]
-    is_confident: bool
-
-
 @app.get("/classify", response_model=ClassifyOut, tags=["ai"])
 def classify_waste(
     text: str = Query(..., description="Текстовое описание предмета"),
@@ -282,7 +274,6 @@ def classify_waste(
     Использует алгоритм классификации на основе взвешенного
     совпадения ключевых слов (TF-IDF-подобный подход).
     """
-    from eco_campus.core.exceptions import ClassificationError
     try:
         result = waste_classifier.classify(text)
     except ClassificationError as exc:
@@ -295,3 +286,27 @@ def classify_waste(
         matched_keywords=result.matched_keywords,
         is_confident=result.is_confident(),
     )
+
+
+@app.get("/qr", tags=["info"])
+def get_qr(
+    url: str = Query(default="http://127.0.0.1:8000", description="URL для QR-кода"),
+) -> Response:
+    """
+    Генерирует QR-код для быстрого доступа к EcoCampus.
+
+    Можно распечатать и разместить у входа в корпус.
+    """
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#1e6b3c", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return Response(content=buf.read(), media_type="image/png")
