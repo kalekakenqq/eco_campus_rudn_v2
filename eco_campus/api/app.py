@@ -2,7 +2,7 @@
 REST API для сервиса эко-логистики кампуса РУДН.
 
 Предоставляет эндпоинты для получения локаций, типов отходов,
-списка контейнеров и построения маршрута до ближайшего экопункта.
+списка контейнеров, построения маршрута, статистики и эко-советов.
 """
 
 import threading
@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from eco_campus.core.eco_tips import get_tip
 from eco_campus.core.exceptions import (
     ContainerNotFoundError,
     EcoCampusError,
@@ -28,6 +29,7 @@ from eco_campus.core.exceptions import (
 from eco_campus.core.logger import setup_logger
 from eco_campus.core.models import WasteType
 from eco_campus.core.router import CampusRouter
+from eco_campus.core.stats import stats_service
 
 logger = setup_logger(__name__)
 
@@ -36,7 +38,6 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 
 def _open_browser() -> None:
-    """Открывает браузер через 1.5 секунды после запуска сервера."""
     time.sleep(1.5)
     webbrowser.open("http://127.0.0.1:8000")
 
@@ -55,7 +56,7 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
 app = FastAPI(
     title="EcoCampus РУДН",
     description="Интеллектуальная навигация по экопунктам кампуса РУДН",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -95,6 +96,7 @@ class RouteOut(BaseModel):
     total_distance_meters: float
     estimated_minutes: float
     summary: str
+    eco_tip: str
 
 
 class LocationOut(BaseModel):
@@ -125,16 +127,14 @@ def _container_to_out(c: Any) -> ContainerOut:
 
 @app.get("/", include_in_schema=False)
 def root() -> FileResponse:
-    """Отдаёт главную страницу веб-интерфейса."""
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 
 @app.get("/api", tags=["info"])
 def api_info() -> dict[str, str]:
-    """Возвращает общую информацию о сервисе."""
     return {
         "service": "EcoCampus РУДН",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "description": "Интеллектуальная навигация к экопунктам кампуса",
         "docs": "/docs",
     }
@@ -165,7 +165,7 @@ def get_waste_types() -> list[dict[str, str]]:
 def get_containers(
     waste_type: str | None = Query(default=None, description="Фильтр по типу отходов"),
 ) -> list[ContainerOut]:
-    """Возвращает все контейнеры с опциональной фильтрацией по типу отходов."""
+    """Возвращает все контейнеры с опциональной фильтрацией."""
     campus_router = _get_router()
     try:
         if waste_type:
@@ -188,7 +188,7 @@ def get_route(
     from_location: str = Query(..., description="ID стартовой точки"),
     waste_type: str = Query(..., description="Тип отходов"),
 ) -> RouteOut:
-    """Строит маршрут от указанной точки до ближайшего контейнера."""
+    """Строит маршрут и возвращает эко-совет для данного типа отходов."""
     campus_router = _get_router()
     try:
         wt = WasteType(waste_type)
@@ -209,6 +209,9 @@ def get_route(
         logger.exception("Неожиданная ошибка маршрутизации")
         raise HTTPException(status_code=500, detail=exc.message) from exc
 
+    stats_service.record_route(wt.label(), from_location)
+    eco_tip = get_tip(wt)
+
     return RouteOut(
         container=_container_to_out(route.target_container),
         waste_type=route.waste_type.label(),
@@ -224,4 +227,31 @@ def get_route(
         total_distance_meters=route.total_distance_meters,
         estimated_minutes=route.estimated_minutes,
         summary=route.summary(),
+        eco_tip=eco_tip,
     )
+
+
+@app.get("/stats", tags=["analytics"])
+def get_stats() -> dict:
+    """
+    Возвращает статистику использования сервиса.
+
+    Показывает общее количество маршрутов, время работы
+    и наиболее популярные типы отходов и локации.
+    """
+    return stats_service.summary()
+
+
+@app.get("/eco-tip", tags=["info"])
+def get_eco_tip(
+    waste_type: str = Query(..., description="Тип отходов"),
+) -> dict[str, str]:
+    """Возвращает случайный эко-совет для данного типа отходов."""
+    try:
+        wt = WasteType(waste_type)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Неизвестный тип отходов: {waste_type!r}",
+        )
+    return {"waste_type": wt.label(), "tip": get_tip(wt)}
