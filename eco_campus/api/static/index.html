@@ -90,6 +90,17 @@
   .qr-section img { border-radius: 12px; border: 2px solid var(--green-pale); max-width: 200px; }
   .qr-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
   .error-msg { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 13px; color: #dc2626; font-size: 13px; margin-top: 12px; display: none; }
+  .chat-messages { height: 320px; overflow-y: auto; border: 1px solid var(--green-border); border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+  .msg-user { background: var(--green-main); color: white; align-self: flex-end; border-radius: 12px 12px 2px 12px; }
+  .msg-bot { background: white; color: var(--text); align-self: flex-start; border: 1px solid var(--green-border); border-radius: 12px 12px 12px 2px; }
+  .msg-loading { opacity: 0.6; font-style: italic; }
+  .chat-input-row { display: flex; gap: 10px; }
+  .chat-input { flex: 1; padding: 11px 14px; border: 1.5px solid var(--green-border); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); }
+  .chat-input:focus { outline: none; border-color: var(--green-light); }
+  .chat-send { padding: 11px 20px; background: var(--green-main); color: white; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .chat-send:hover { background: var(--green-dark); }
+  .chat-send:disabled { background: #b0c4b8; cursor: not-allowed; }
   footer { text-align: center; padding: 28px 0 40px; font-size: 11px; color: var(--muted); font-family: var(--mono); }
 </style>
 </head>
@@ -115,6 +126,7 @@
       <button class="tab" onclick="switchTab('points',this)">Экопункты</button>
       <button class="tab" onclick="switchTab('stats',this)">Статистика</button>
       <button class="tab" onclick="switchTab('qr',this)">QR-код</button>
+      <button class="tab" onclick="switchTab('chat',this)">Эко-ассистент</button>
     </div>
 
     <div class="tab-pane active" id="tab-route">
@@ -186,6 +198,17 @@
       </div>
       <button class="btn btn-outline" onclick="downloadQR()">Скачать QR-код</button>
     </div>
+  <div class="tab-pane" id="tab-chat">
+      <div class="section-label">Эко-ассистент на базе YandexGPT</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Задайте любой вопрос об экологии, раздельном сборе или переработке отходов.</p>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg msg-bot">Здравствуйте! Я эко-ассистент кампуса РУДН. Спрашивайте всё об экологии и раздельном сборе отходов.</div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Ваш вопрос об экологии..." onkeydown="if(event.key==='Enter') sendChat()">
+        <button class="chat-send" id="chat-send" onclick="sendChat()">Отправить</button>
+      </div>
+    </div>
   </div>
 
   <div class="result-box" id="result">
@@ -197,7 +220,7 @@
     </div>
   </div>
 
-  <footer>EcoCampus РУДН v4.0 &nbsp;·&nbsp; Алгоритм Дейкстры &nbsp;·&nbsp; TF-IDF классификатор &nbsp;·&nbsp; Leaflet.js</footer>
+  <footer>EcoCampus РУДН v5.0 &nbsp;·&nbsp; Алгоритм Дейкстры &nbsp;·&nbsp; TF-IDF классификатор &nbsp;·&nbsp; Leaflet.js</footer>
 </div>
 
 <script>
@@ -354,6 +377,38 @@ function downloadQR() {
   a.href = API + '/qr?url=http://127.0.0.1:8000';
   a.download = 'ecocampus_qr.png';
   a.click();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const send = document.getElementById('chat-send');
+  const messages = document.getElementById('chat-messages');
+  const text = input.value.trim();
+  if (!text) return;
+
+  messages.innerHTML += '<div class="msg msg-user">' + text + '</div>';
+  messages.innerHTML += '<div class="msg msg-bot msg-loading" id="loading-msg">Думаю...</div>';
+  messages.scrollTop = messages.scrollHeight;
+  input.value = '';
+  send.disabled = true;
+
+  try {
+    const res = await fetch(API + '/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text})
+    });
+    const data = await res.json();
+    document.getElementById('loading-msg').remove();
+    if (!res.ok) throw new Error(data.detail || 'Ошибка сервера');
+    messages.innerHTML += '<div class="msg msg-bot">' + data.reply + '</div>';
+  } catch(e) {
+    document.getElementById('loading-msg').remove();
+    messages.innerHTML += '<div class="msg msg-bot" style="color:#dc2626">Ошибка: ' + e.message + '</div>';
+  } finally {
+    send.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
+  }
 }
 
 function switchTab(name, el) {

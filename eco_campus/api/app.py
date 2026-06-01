@@ -310,3 +310,31 @@ def get_qr(
     img.save(buf, format="PNG")
     buf.seek(0)
     return Response(content=buf.read(), media_type="image/png")
+
+
+from eco_campus.core.chatbot import ask_yandex_gpt
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+class ChatOut(BaseModel):
+    reply: str
+
+
+@app.post("/chat", response_model=ChatOut, tags=["ai"])
+async def chat(request: ChatRequest) -> ChatOut:
+    """
+    Отвечает на вопрос пользователя об экологии через YandexGPT.
+
+    Требует переменных окружения YANDEX_API_KEY и YANDEX_FOLDER_ID.
+    """
+    if not request.message.strip():
+        raise HTTPException(status_code=422, detail="Сообщение не может быть пустым")
+    try:
+        reply = await ask_yandex_gpt(request.message)
+    except RuntimeError as exc:
+        logger.error("Ошибка чат-бота: %s", exc)
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return ChatOut(reply=reply)
