@@ -193,7 +193,7 @@
     <div class="tab-pane" id="tab-qr">
       <div class="section-label">QR-код для быстрого доступа</div>
       <div class="qr-section">
-        <img src="/qr?url=http://127.0.0.1:8000" alt="QR-код EcoCampus">
+        <img src="/qr?url=" alt="QR-код EcoCampus">
         <p class="qr-hint">Распечатайте и разместите у входа в корпус</p>
       </div>
       <button class="btn btn-outline" onclick="downloadQR()">Скачать QR-код</button>
@@ -224,7 +224,7 @@
 </div>
 
 <script>
-const API = 'http://127.0.0.1:8000';
+const API = '';
 let map = null, routeLayer = null, allContainers = [], lastRoute = null;
 
 function makeIcon(color) {
@@ -374,7 +374,7 @@ async function loadStats() {
 
 function downloadQR() {
   const a = document.createElement('a');
-  a.href = API + '/qr?url=http://127.0.0.1:8000';
+  a.href = API + '/qr?url=';
   a.download = 'ecocampus_qr.png';
   a.click();
 }
