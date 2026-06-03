@@ -295,6 +295,11 @@
             <div class="chart-wrap"><canvas id="chart-loc"></canvas></div>
           </div>
         </div>
+        <div class="chart-box" style="margin-bottom:16px">
+          <div class="chart-title">🤖 Прогноз загруженности · Линейная регрессия</div>
+          <div class="chart-wrap" style="height:180px"><canvas id="chart-predict"></canvas></div>
+          <div id="best-hours" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
         <button class="btn-outline" onclick="loadStats()">Обновить данные</button>
       </div>
     </div>
@@ -458,7 +463,7 @@ async function classifyWaste() {
   finally { label.textContent='Определить тип'; spinner.style.display='none'; }
 }
 
-let chartWaste = null, chartLoc = null;
+let chartWaste = null, chartLoc = null, chartPredict = null;
 
 const WASTE_LABELS = {
   plastic: 'Пластик', paper: 'Бумага', glass: 'Стекло',
@@ -543,6 +548,50 @@ async function loadStats() {
       if (chartLoc) chartLoc.destroy();
       chartLoc = makeChart('chart-loc', demo.labels, demo.vals, 'doughnut');
     }
+    // График прогноза загруженности (линейная регрессия)
+    try {
+      const pred = await fetch(API+'/predict/load').then(r=>r.json());
+      const hours = pred.forecast.map(h => h.hour+':00');
+      const loads = pred.forecast.map(h => h.load);
+      const now = new Date().getHours();
+      const colors = loads.map((_, i) => i === now ? 'rgba(220,38,38,0.9)' : 'rgba(45,158,89,0.7)');
+      if (chartPredict) chartPredict.destroy();
+      chartPredict = new Chart(document.getElementById('chart-predict').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: hours,
+          datasets: [{
+            data: loads,
+            borderColor: 'rgba(30,107,60,1)',
+            backgroundColor: 'rgba(45,158,89,0.1)',
+            pointBackgroundColor: colors,
+            pointRadius: loads.map((_, i) => i === now ? 6 : 3),
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.raw} чел. — ${pred.forecast[ctx.dataIndex].label}` } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 12 } },
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+      // Лучшие часы
+      const LOAD_COLOR = { 'Свободно': 'var(--g400)', 'Умеренно': '#f59e0b', 'Оживлённо': '#f97316', 'Пик': '#dc2626' };
+      document.getElementById('best-hours').innerHTML =
+        '<span style="font-size:11px;color:var(--muted);margin-right:4px">Лучшее время:</span>' +
+        pred.best_hours.map(h =>
+          `<span style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--sage-light);border:1px solid var(--g100);color:var(--g700)">
+            ${h.hour}:00 — ${h.label}
+          </span>`
+        ).join('');
+    } catch(e) { console.error('predict error', e); }
   } catch(e) { console.error(e); }
 }
 

@@ -35,6 +35,7 @@ from eco_campus.core.logger import setup_logger
 from eco_campus.core.models import WasteType
 from eco_campus.core.router import CampusRouter
 from eco_campus.core.stats import stats_service
+from eco_campus.core.predictor import load_predictor
 
 logger = setup_logger(__name__)
 
@@ -247,6 +248,30 @@ def get_route(
 def get_stats() -> dict:
     """Возвращает статистику использования сервиса."""
     return stats_service.summary()
+
+
+@app.get("/predict/load", tags=["ai"])
+def predict_load(
+    hour: int | None = Query(default=None, ge=0, le=23, description="Час дня (0-23). Если не указан — прогноз на весь день"),
+) -> dict:
+    """
+    Прогнозирует загруженность экопунктов с помощью линейной регрессии.
+
+    Модель обучена на данных суточного ритма кампуса РУДН.
+    Возвращает ожидаемое число посетителей и рекомендованные часы.
+    """
+    if hour is not None:
+        return {
+            "hour": hour,
+            "load": load_predictor.predict_hour(hour),
+            "label": load_predictor._load_label(load_predictor.predict_hour(hour)),
+            "model_info": load_predictor.model_info,
+        }
+    return {
+        "forecast": load_predictor.predict_day(),
+        "best_hours": load_predictor.best_hours(),
+        "model_info": load_predictor.model_info,
+    }
 
 
 @app.get("/eco-tip", tags=["info"])
