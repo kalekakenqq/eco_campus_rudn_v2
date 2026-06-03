@@ -46,10 +46,10 @@
 
   .nav-tabs { display: flex; background: var(--white); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 6px; gap: 4px; margin-bottom: 20px; box-shadow: var(--shadow-sm); overflow-x: auto; scrollbar-width: none; }
   .nav-tabs::-webkit-scrollbar { display: none; }
-  .tab { flex: 1; min-width: 80px; padding: 10px 8px; border: none; border-radius: var(--r-md); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); background: transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; line-height: 1; }
-  .tab .ti { font-size: 16px; line-height: 1; display: block; }
-  .tab .tl { font-size: 11px; display: block; line-height: 1; }
+  .tab { flex: 1; min-width: 80px; padding: 10px 8px; border: none; border-radius: var(--r-md); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); background: transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; line-height: 1; vertical-align: middle; }
+  .tab svg { width: 15px; height: 15px; flex-shrink: 0; vertical-align: middle; }
   .tab.active { background: var(--g600); color: white; box-shadow: var(--shadow-sm); }
+  .tab.active svg { stroke: white; }
   .tab:hover:not(.active) { background: var(--sage-light); color: var(--g600); }
   .tab-pane { display: none; }
   .tab-pane.active { display: block; animation: fadeIn 0.2s ease; }
@@ -181,13 +181,34 @@
 <div class="wrap">
   <div class="content-area">
     <div class="nav-tabs">
-      <button class="tab active" onclick="switchTab('route',this)"><span class="ti">🗺</span><span class="tl">Маршрут</span></button>
-      <button class="tab" onclick="switchTab('map',this)"><span class="ti">📍</span><span class="tl">Карта</span></button>
-      <button class="tab" onclick="switchTab('classify',this)"><span class="ti">🔍</span><span class="tl">Тип отходов</span></button>
-      <button class="tab" onclick="switchTab('points',this)"><span class="ti">♻️</span><span class="tl">Экопункты</span></button>
-      <button class="tab" onclick="switchTab('stats',this)"><span class="ti">📊</span><span class="tl">Статистика</span></button>
-      <button class="tab" onclick="switchTab('qr',this)"><span class="ti">📱</span><span class="tl">QR-код</span></button>
-      <button class="tab" onclick="switchTab('chat',this)"><span class="ti">🤖</span><span class="tl">Ассистент</span></button>
+      <button class="tab active" onclick="switchTab('route',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="9" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
+        Маршрут
+      </button>
+      <button class="tab" onclick="switchTab('map',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Карта
+      </button>
+      <button class="tab" onclick="switchTab('classify',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Тип отходов
+      </button>
+      <button class="tab" onclick="switchTab('points',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.815a1.83 1.83 0 01-1.57-2.777L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 001.556-2.79L15.36 9.5"/><path d="M9.5 2A2.5 2.5 0 0012 4.5 2.5 2.5 0 0014.5 2"/><path d="M12 4.5V9.5"/><path d="M7 19a2 2 0 004 0"/><path d="M13 19a2 2 0 004 0"/></svg>
+        Экопункты
+      </button>
+      <button class="tab" onclick="switchTab('stats',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Статистика
+      </button>
+      <button class="tab" onclick="switchTab('qr',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3"/></svg>
+        QR-код
+      </button>
+      <button class="tab" onclick="switchTab('chat',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect x="8" y="12" width="8" height="4" rx="1"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/></svg>
+        Ассистент
+      </button>
     </div>
 
     <div class="tab-pane active" id="tab-route">
