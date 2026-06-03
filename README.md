@@ -1,8 +1,30 @@
 # EcoCampus РУДН
 
+![CI](https://github.com/kalekakenqq/eco_campus_rudn_v2/actions/workflows/tests.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)
+![Tests](https://img.shields.io/badge/tests-90%20passed-brightgreen)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)
+
 Интеллектуальная система эко-логистики кампуса РУДН. Помогает студентам
 и сотрудникам находить ближайший экопункт раздельного сбора отходов
 и строит пешеходный маршрут с помощью алгоритма Дейкстры.
+
+🌐 **[Открыть приложение](https://eco-campus-rudn-scalevillain.amvera.io)** &nbsp;·&nbsp; 📖 **[API документация](https://eco-campus-rudn-scalevillain.amvera.io/docs)**
+
+## Скриншоты
+
+| Главная страница | Построение маршрута |
+|:---:|:---:|
+| ![Главная](docs/screenshots/01_main.png) | ![Маршрут](docs/screenshots/02_route.png) |
+
+| Карта экопунктов | Аналитика и графики |
+|:---:|:---:|
+| ![Карта](docs/screenshots/03_map_zoom.png) | ![Статистика](docs/screenshots/05_stats.png) |
+
+| Эко-ассистент YandexGPT |
+|:---:|
+| ![Ассистент](docs/screenshots/06_assistant.png) |
 
 ## Проблема
 
