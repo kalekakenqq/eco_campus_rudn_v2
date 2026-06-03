@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получение кода
+        uses: actions/checkout@v4
+
+      - name: Установка Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Запуск тестов
+        run: |
+          python -m pytest eco_campus/tests/ -v --cov=eco_campus --cov-report=term-missing
+
+      - name: Проверка покрытия (минимум 80%)
+        run: |
+          python -m pytest eco_campus/tests/ --cov=eco_campus --cov-fail-under=80
