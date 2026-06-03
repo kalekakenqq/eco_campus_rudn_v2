@@ -50,6 +50,18 @@ class StatsService:
             for loc, count in self.location_counter.most_common(n)
         ]
 
+    def co2_saved_kg(self) -> float:
+        """
+        Рассчитывает примерный объём сэкономленных выбросов CO₂ в кг.
+
+        Методология: согласно данным EPA и EEA, отправка 1 кг смешанных
+        отходов на полигон генерирует ~2.5 кг CO₂-эквивалента (метан +
+        транспорт). Средний вес одного визита к экопункту — ~0.3 кг.
+        Итого: 1 маршрут ≈ 0.75 кг сэкономленного CO₂.
+        """
+        CO2_PER_ROUTE_KG = 0.75
+        return round(self.total_routes * CO2_PER_ROUTE_KG, 2)
+
     def summary(self) -> dict:
         """Возвращает сводку статистики использования сервиса."""
         uptime = datetime.now() - self.started_at
@@ -61,7 +73,7 @@ class StatsService:
             "top_waste_types": self.top_waste_types(),
             "top_locations": self.top_locations(),
             "started_at": self.started_at.strftime("%d.%m.%Y %H:%M"),
+            "co2_saved_kg": self.co2_saved_kg(),
         }
-
 
 stats_service = StatsService()

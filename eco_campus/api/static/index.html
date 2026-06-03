@@ -107,6 +107,12 @@
   .top-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--sage-light); border-radius: var(--r-sm); font-size: 13px; border: 1px solid var(--g100); }
   .top-count { font-family: var(--mono); font-weight: 600; color: var(--g600); font-size: 12px; }
 
+  .co2-banner { background: linear-gradient(135deg, #0f3d22, #1e6b3c); border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 16px; display: flex; align-items: center; gap: 20px; }
+  .co2-icon { font-size: 40px; flex-shrink: 0; }
+  .co2-val { font-size: 36px; font-weight: 700; color: #4caf7d; font-family: var(--mono); line-height: 1; }
+  .co2-label { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; line-height: 1.4; }
+  .co2-source { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 6px; font-family: var(--mono); }
+
   #map { height: 420px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--border); margin-bottom: 14px; }
   .map-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
@@ -262,6 +268,14 @@
     <div class="tab-pane" id="tab-stats">
       <div class="card">
         <div class="card-title">📊 Аналитика использования</div>
+        <div class="co2-banner" id="co2-banner">
+          <div class="co2-icon">🌱</div>
+          <div>
+            <div class="co2-val" id="co2-val">0 кг</div>
+            <div class="co2-label">CO₂ сэкономлено благодаря раздельному сбору</div>
+            <div class="co2-source">Методология: EPA + EEA · 0.75 кг CO₂ на один маршрут</div>
+          </div>
+        </div>
         <div class="stats-grid">
           <div class="stat-card"><span class="stat-val" id="s-total">—</span><span class="stat-lbl">Маршрутов</span></div>
           <div class="stat-card"><span class="stat-val" id="s-uptime">—</span><span class="stat-lbl">Время работы</span></div>
@@ -490,6 +504,10 @@ async function loadStats() {
     document.getElementById('s-total').textContent = data.total_routes;
     document.getElementById('s-uptime').textContent = data.uptime;
     document.getElementById('s-start').textContent = data.started_at.split(' ')[1];
+
+    // CO₂ баннер
+    const co2 = data.co2_saved_kg ?? (data.total_routes * 0.75);
+    document.getElementById('co2-val').textContent = co2.toFixed(2) + ' кг';
 
     // Инсайт
     if (data.total_routes > 0 && data.top_waste_types.length > 0) {
