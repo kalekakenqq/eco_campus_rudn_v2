@@ -385,8 +385,32 @@ function makeRoutePopup(title, subtitle, color) {
 
 function initMap() {
   if (map) return;
-  map = L.map('map').setView([55.6525, 37.4825], 16);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'OpenStreetMap contributors', maxZoom:19}).addTo(map);
+  map = L.map('map', { preferCanvas: true }).setView([55.6525, 37.4825], 16);
+
+  // Основной источник — 2GIS (российский, без флагов, быстрый)
+  const mainLayer = L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}&v=1', {
+    attribution: '2GIS',
+    maxZoom: 18,
+  });
+
+  // Резервный — CartoDB светлая тема
+  const fallbackLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© CartoDB',
+    maxZoom: 19,
+  });
+
+  mainLayer.addTo(map);
+
+  // Если 2GIS не загрузился за 5 секунд — переключаемся на CartoDB
+  let tilesLoaded = false;
+  mainLayer.on('tileload', () => { tilesLoaded = true; });
+  setTimeout(() => {
+    if (!tilesLoaded) {
+      map.removeLayer(mainLayer);
+      fallbackLayer.addTo(map);
+    }
+  }, 5000);
+
   allContainers.forEach(c => {
     const key = Object.keys(ICONS).find(k => c.accepted_types.some(t => t.toLowerCase().includes(k))) || 'mixed';
     L.marker([c.lat, c.lon], {icon: makeIcon('#1e6b3c', ICONS[key])})
@@ -676,6 +700,11 @@ function switchTab(name, el) {
 }
 
 init();
+
+// Keepalive — пингуем сервер каждые 4 минуты чтобы не засыпал
+setInterval(() => {
+  fetch(API + '/api').catch(() => {});
+}, 4 * 60 * 1000);
 </script>
 </body>
 </html>
