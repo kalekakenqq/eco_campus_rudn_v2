@@ -121,6 +121,7 @@
   .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; border: 1px solid #e8f5ee !important; padding: 0 !important; }
   .leaflet-popup-content { margin: 14px 16px !important; }
   .leaflet-popup-tip { background: white !important; }
+  .leaflet-control-attribution { font-size: 9px !important; opacity: 0.5 !important; background: rgba(255,255,255,0.6) !important; }
 
   .classify-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--r-sm); font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); resize: vertical; min-height: 90px; transition: border-color 0.15s, box-shadow 0.15s; line-height: 1.5; background: var(--white); }
   .classify-input:focus { outline: none; border-color: var(--g500); box-shadow: 0 0 0 3px rgba(45, 158, 89, 0.1); }
@@ -385,23 +386,28 @@ function makeRoutePopup(title, subtitle, color) {
 
 function initMap() {
   if (map) return;
-  map = L.map('map', { preferCanvas: true }).setView([55.6525, 37.4825], 16);
+  // attributionControl: false — отключаем стандартный attribution с флагами
+  map = L.map('map', { preferCanvas: true, attributionControl: false }).setView([55.6525, 37.4825], 16);
 
-  // Основной источник — 2GIS (российский, без флагов, быстрый)
+  // Добавляем свой attribution без флагов
+  L.control.attribution({ prefix: false })
+    .addAttribution('© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | 2GIS')
+    .addTo(map);
+
+  // Основной источник — 2GIS
   const mainLayer = L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}&v=1', {
-    attribution: '2GIS',
+    attribution: '',
     maxZoom: 18,
   });
 
-  // Резервный — CartoDB светлая тема
+  // Резервный — CartoDB
   const fallbackLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© CartoDB',
+    attribution: '',
     maxZoom: 19,
   });
 
   mainLayer.addTo(map);
 
-  // Если 2GIS не загрузился за 5 секунд — переключаемся на CartoDB
   let tilesLoaded = false;
   mainLayer.on('tileload', () => { tilesLoaded = true; });
   setTimeout(() => {
