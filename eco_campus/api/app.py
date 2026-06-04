@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from functools import lru_cache
 
 from eco_campus.core.classifier import classifier as waste_classifier
 from eco_campus.core.eco_tips import get_tip

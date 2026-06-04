@@ -1,1 +1,1 @@
-web: pip install -e . && python -m uvicorn eco_campus.api.app:app --host 0.0.0.0 --port $PORT
+web: pip install -r requirements.txt && python -m uvicorn eco_campus.api.app:app --host 0.0.0.0 --port $PORT --workers 2 --timeout-keep-alive 30

@@ -153,6 +153,11 @@
   footer a { color: var(--g500); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   @media(max-width:600px){ .charts-row { grid-template-columns: 1fr; } }
   .chart-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px; }
@@ -452,13 +457,34 @@ function resetMap() {
   if (map) map.setView([55.6525, 37.4825], 16);
 }
 
+// Кэш запросов — данные хранятся в сессии, не грузим повторно
+const _cache = {};
+async function cachedFetch(url) {
+  if (_cache[url]) return _cache[url];
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Ошибка сети');
+  _cache[url] = await res.json();
+  return _cache[url];
+}
+
+function showSkeleton(id, rows = 3) {
+  document.getElementById(id).innerHTML = Array(rows).fill(
+    `<div style="height:40px;background:linear-gradient(90deg,#e8f5ee 25%,#d4edd9 50%,#e8f5ee 75%);
+     background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:8px;margin-bottom:8px"></div>`
+  ).join('');
+}
+
 async function init() {
+  // Показываем skeleton пока грузится
+  showSkeleton('loc', 1);
+
   try {
-    const [lr, wr, cr] = await Promise.all([
-      fetch(API+'/locations'), fetch(API+'/waste-types'), fetch(API+'/containers')
+    const [locs, wastes, containers] = await Promise.all([
+      cachedFetch(API+'/locations'),
+      cachedFetch(API+'/waste-types'),
+      cachedFetch(API+'/containers'),
     ]);
-    const locs = await lr.json(), wastes = await wr.json();
-    allContainers = await cr.json();
+    allContainers = containers;
     document.getElementById('loc').innerHTML = locs.map(l=>`<option value="${l.node_id}">${l.display_name}</option>`).join('');
     document.getElementById('waste').innerHTML = wastes.map(w=>`<option value="${w.value}">${w.label}</option>`).join('');
     document.getElementById('grid').innerHTML = allContainers.map(c => {
@@ -469,6 +495,7 @@ async function init() {
     document.getElementById('stat-containers').textContent = allContainers.length;
   } catch {
     document.getElementById('status-badge').textContent = 'нет соединения с сервером';
+    document.getElementById('loc').innerHTML = '<option>Ошибка загрузки</option>';
   }
 }
 
