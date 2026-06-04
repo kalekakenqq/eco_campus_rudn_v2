@@ -5,7 +5,7 @@
 ![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)
-![Keywords](https://img.shields.io/badge/keywords-634-green)
+![Keywords](https://img.shields.io/badge/keywords-1007-green)
 
 Интеллектуальная система эко-логистики кампуса РУДН. Помогает студентам
 и сотрудникам находить ближайший экопункт раздельного сбора отходов
