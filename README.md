@@ -1,9 +1,9 @@
 # EcoCampus РУДН
 
-![CI](https://github.com/kalekakenqq/eco_campus_rudn_v2/actions/workflows/tests.yml/badge.svg)
+![CI](https://github.com/kalekakenqq/eco_campus_rudn_v2/actions/workflows/tests.yml/badge.svg?branch=main)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-90%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)
 
 Интеллектуальная система эко-логистики кампуса РУДН. Помогает студентам
