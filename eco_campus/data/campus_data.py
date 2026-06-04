@@ -88,6 +88,7 @@ CAMPUS_EDGES: list[tuple[str, str, float]] = [
     ("library", "sports_complex", 100),
     ("sports_complex", "medical_center", 70),
     ("sports_complex", "main_entrance", 180),
+    ("fii_building", "main_entrance", 950),
 ]
 
 CONTAINERS: list[Container] = [
