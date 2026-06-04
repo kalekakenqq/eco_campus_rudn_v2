@@ -19,13 +19,13 @@
 |:---:|:---:|
 | ![Главная](docs/screenshots/01_main.png) | ![Маршрут](docs/screenshots/02_route.png) |
 
-| Карта экопунктов | Аналитика и графики |
+| Карта экопунктов | Аналитика и CO₂ |
 |:---:|:---:|
 | ![Карта](docs/screenshots/03_map_zoom.png) | ![Статистика](docs/screenshots/05_stats.png) |
 
-| Эко-ассистент YandexGPT |
-|:---:|
-| ![Ассистент](docs/screenshots/06_assistant.png) |
+| Прогноз загруженности (ML) | Эко-ассистент YandexGPT |
+|:---:|:---:|
+| ![Регрессия](docs/screenshots/05b_predict.png) | ![Ассистент](docs/screenshots/06_assistant.png) |
 
 ## Проблема
 
