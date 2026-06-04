@@ -32,7 +32,7 @@
     --mono: 'JetBrains Mono', monospace;
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
   }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overscroll-behavior: none; }
 
   .hero { background: linear-gradient(160deg, #0f3d22 0%, #1e6b3c 50%, #2d9e59 100%); padding: 48px 20px 64px; position: relative; overflow: hidden; }
   .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
@@ -51,11 +51,15 @@
   .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
   .content-area { margin-top: 24px; }
 
-  .nav-tabs { display: flex; background: var(--white); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 6px; gap: 4px; margin-bottom: 20px; box-shadow: var(--shadow-sm); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav-tabs { display: flex; background: var(--white); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 5px; gap: 2px; margin-bottom: 20px; box-shadow: var(--shadow-sm); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .nav-tabs::-webkit-scrollbar { display: none; }
-  .tab { flex: 0 0 auto; padding: 9px 14px; border: none; border-radius: var(--r-md); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--muted); background: transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; line-height: 1.2; }
+  .tab { flex: 0 0 auto; padding: 8px 12px; border: none; border-radius: var(--r-md); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--muted); background: transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; line-height: 1.2; }
   .tab.active { background: var(--g600); color: white; box-shadow: var(--shadow-sm); }
   .tab:hover:not(.active) { background: var(--sage-light); color: var(--g600); }
+
+  @media (max-width: 480px) {
+    .tab { padding: 7px 9px; font-size: 11px; }
+  }
   .tab-pane { display: none; }
   .tab-pane.active { display: block; animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
