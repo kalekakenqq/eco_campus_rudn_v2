@@ -2,8 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1e6b3c">
+<meta name="description" content="Интеллектуальная навигация к экопунктам кампуса РУДН. Алгоритм Дейкстры, TF-IDF классификатор, sklearn, YandexGPT.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>EcoCampus РУДН</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231e6b3c'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white'>♻</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231e6b3c'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white'>♻</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -165,6 +171,76 @@
   .chart-wrap { position: relative; height: 200px; }
   .stat-insight { background: linear-gradient(135deg, var(--g700), var(--g600)); border-radius: var(--r-md); padding: 16px 20px; color: white; margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
   .stat-insight strong { font-size: 22px; display: block; font-family: var(--mono); margin-bottom: 2px; }
+
+  /* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
+  @media (max-width: 640px) {
+    .hero { padding: 28px 16px 48px; }
+    .hero-inner { max-width: 100%; }
+    .hero-title { font-size: 32px; }
+    .hero-sub { font-size: 13px; }
+    .hero-stats { gap: 16px; }
+    .hero-stat-val { font-size: 26px; }
+    .hero-stat-lbl { font-size: 9px; }
+    .hero-badge { font-size: 11px; padding: 4px 12px; }
+
+    .wrap { padding: 0 12px 40px; }
+    .content-area { margin-top: 16px; }
+
+    .nav-tabs { padding: 4px; gap: 2px; border-radius: 14px; }
+    .tab { min-width: 0; padding: 8px 6px; font-size: 11px; flex: 1; }
+
+    .card { padding: 16px; }
+    .card-title { font-size: 11px; }
+
+    .form-row { grid-template-columns: 1fr; gap: 10px; }
+    .btn-primary { padding: 14px; font-size: 14px; }
+
+    .route-pills { flex-wrap: wrap; gap: 6px; }
+    .route-pill { font-size: 11px; padding: 4px 10px; }
+    .route-name { font-size: 16px; }
+
+    .steps { gap: 8px; }
+    .step { padding: 10px 12px; gap: 10px; }
+    .step-n { width: 24px; height: 24px; font-size: 11px; flex-shrink: 0; }
+    .step-text { font-size: 13px; }
+    .step-dist { font-size: 11px; }
+
+    #map { height: 300px; }
+
+    .points-grid { grid-template-columns: 1fr; }
+    .c-card { padding: 14px; }
+
+    .stats-grid { grid-template-columns: 1fr; gap: 8px; }
+    .stat-val { font-size: 24px; }
+    .charts-row { grid-template-columns: 1fr; }
+    .chart-wrap { height: 160px; }
+
+    .co2-banner { padding: 14px 16px; gap: 12px; }
+    .co2-val { font-size: 28px; }
+    .co2-label { font-size: 12px; }
+    .co2-source { font-size: 9px; }
+
+    .chat-messages { height: 300px; }
+    .chat-input-row { gap: 8px; }
+    .chat-input { font-size: 14px; padding: 10px 12px; }
+    .chat-send { padding: 10px 16px; font-size: 13px; }
+
+    .qr-box { padding: 20px 16px; }
+
+    footer { font-size: 10px; padding: 20px 16px; line-height: 1.8; }
+
+    .classify-form { gap: 10px; }
+    .classify-input { font-size: 14px; }
+    .result-badge { font-size: 14px; padding: 10px 16px; }
+
+    .btn-outline { padding: 10px 16px; font-size: 13px; }
+  }
+
+  @media (max-width: 400px) {
+    .hero-title { font-size: 26px; }
+    .tab { font-size: 10px; padding: 7px 4px; }
+    .hero-stats { gap: 12px; }
+  }
 </style>
 </head>
 <body>
