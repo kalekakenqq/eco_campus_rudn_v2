@@ -40,7 +40,7 @@ class LoadPredictor:
     """
     Предсказывает загруженность экопунктов по часу дня.
 
-    Использует полиномиальную регрессию степени 4 для аппроксимации
+    Использует полиномиальную регрессию степени 6 для аппроксимации
     двугорбой суточной кривой посещаемости.
     """
 
@@ -54,7 +54,7 @@ class LoadPredictor:
         loads = np.array([v for _, v in _TRAINING_DATA])
 
         pipeline = Pipeline([
-            ("poly", PolynomialFeatures(degree=4, include_bias=False)),
+            ("poly", PolynomialFeatures(degree=6, include_bias=False)),
             ("regressor", LinearRegression()),
         ])
         pipeline.fit(hours, loads)
@@ -130,7 +130,7 @@ class LoadPredictor:
         loads = np.array([v for _, v in _TRAINING_DATA])
         return {
             "algorithm": "Polynomial Linear Regression",
-            "degree": 4,
+            "degree": 6,
             "r2_score": round(float(self._model.score(hours, loads)), 4),
             "training_samples": len(_TRAINING_DATA),
             "features": ["hour_of_day"],
