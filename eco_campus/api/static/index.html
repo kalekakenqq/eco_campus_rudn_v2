@@ -59,6 +59,12 @@
 
   @media (max-width: 480px) {
     .tab { padding: 7px 9px; font-size: 11px; }
+    .tab-short { display: inline; }
+    .tab-full { display: none; }
+  }
+  @media (min-width: 481px) {
+    .tab-short { display: none; }
+    .tab-full { display: inline; }
   }
   .tab-pane { display: none; }
   .tab-pane.active { display: block; animation: fadeIn 0.2s ease; }
@@ -284,13 +290,13 @@
 <div class="wrap">
   <div class="content-area">
     <div class="nav-tabs">
-      <button class="tab active" onclick="switchTab('route',this)">Маршрут</button>
-      <button class="tab" onclick="switchTab('map',this)">Карта</button>
-      <button class="tab" onclick="switchTab('classify',this)">Тип отходов</button>
-      <button class="tab" onclick="switchTab('points',this)">Экопункты</button>
-      <button class="tab" onclick="switchTab('stats',this)">Статистика</button>
-      <button class="tab" onclick="switchTab('qr',this)">QR-код</button>
-      <button class="tab" onclick="switchTab('chat',this)">Ассистент</button>
+      <button class="tab active" onclick="switchTab('route',this)"><span class="tab-full">Маршрут</span><span class="tab-short">Маршрут</span></button>
+      <button class="tab" onclick="switchTab('map',this)"><span class="tab-full">Карта</span><span class="tab-short">Карта</span></button>
+      <button class="tab" onclick="switchTab('classify',this)"><span class="tab-full">Тип отходов</span><span class="tab-short">Отходы</span></button>
+      <button class="tab" onclick="switchTab('points',this)"><span class="tab-full">Экопункты</span><span class="tab-short">Пункты</span></button>
+      <button class="tab" onclick="switchTab('stats',this)"><span class="tab-full">Статистика</span><span class="tab-short">Стат.</span></button>
+      <button class="tab" onclick="switchTab('qr',this)"><span class="tab-full">QR-код</span><span class="tab-short">QR</span></button>
+      <button class="tab" onclick="switchTab('chat',this)"><span class="tab-full">Ассистент</span><span class="tab-short">Бот</span></button>
     </div>
 
     <div class="tab-pane active" id="tab-route">
