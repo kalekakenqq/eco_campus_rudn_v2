@@ -50,7 +50,11 @@ def _open_browser() -> None:
 
 
 def _run_bot_in_thread() -> None:
-    """Запускает Telegram-бота в отдельном потоке с собственным event loop."""
+    """Запускает Telegram-бота в отдельном потоке с собственным event loop.
+
+    Использует run_bot_async() — версию без signal handlers,
+    совместимую с запуском в не-главном потоке.
+    """
     import asyncio
     import os
 
@@ -63,8 +67,8 @@ def _run_bot_in_thread() -> None:
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from eco_campus.bot.telegram_bot import run_bot
-        run_bot()
+        from eco_campus.bot.telegram_bot import run_bot_async
+        loop.run_until_complete(run_bot_async())
     except Exception:
         logger.exception("Telegram-бот упал с ошибкой")
 

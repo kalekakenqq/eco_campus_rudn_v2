@@ -265,15 +265,8 @@ async def _build_and_send_route(
     )
 
 
-def run_bot() -> None:
-    """Запускает Telegram-бота."""
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not token:
-        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
-        raise EnvironmentError(
-            "Укажите токен бота в переменной окружения TELEGRAM_BOT_TOKEN"
-        )
-
+def _build_application(token: str):
+    """Собирает Application с хэндлерами."""
     application = Application.builder().token(token).build()
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("help", cmd_help))
@@ -282,7 +275,37 @@ def run_bot() -> None:
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text)
     )
+    return application
 
+
+async def run_bot_async() -> None:
+    """Запускает бота без signal handlers — для вызова из фонового потока."""
+    import asyncio
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
+        return
+
+    application = _build_application(token)
+    logger.info("Telegram-бот запущен")
+
+    async with application:
+        await application.start()
+        await application.updater.start_polling(drop_pending_updates=True)
+        # Ждём вечно — пока поток не будет убит вместе с процессом
+        await asyncio.Event().wait()
+
+
+def run_bot() -> None:
+    """Запускает бота в главном потоке (локальный запуск)."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
+        raise EnvironmentError(
+            "Укажите токен бота в переменной окружения TELEGRAM_BOT_TOKEN"
+        )
+
+    application = _build_application(token)
     logger.info("Telegram-бот запущен")
     application.run_polling()
 
