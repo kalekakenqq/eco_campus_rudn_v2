@@ -18,7 +18,7 @@ from eco_campus.core.exceptions import (
 )
 from eco_campus.core.logger import setup_logger
 from eco_campus.core.models import Container, Route, RouteStep, UserLocation, WasteType
-from eco_campus.data.campus_data import CAMPUS_EDGES, CAMPUS_NODES, CONTAINERS
+from eco_campus.data.campus_data import CAMPUS_EDGES, CAMPUS_NODES, CAMPUS_NODES_ALL, CONTAINERS
 
 logger = setup_logger(__name__)
 
@@ -37,7 +37,8 @@ class CampusRouter:
     def __init__(self) -> None:
         self._graph: nx.Graph = nx.Graph()
         self._containers: list[Container] = list(CONTAINERS)
-        self._nodes: dict[str, dict] = CAMPUS_NODES
+        self._nodes: dict[str, dict] = CAMPUS_NODES_ALL  # все узлы для графа
+        self._user_nodes: dict[str, dict] = CAMPUS_NODES  # только для показа пользователю
         self._build_graph()
         logger.info(
             "CampusRouter инициализирован: %d узлов, %d рёбер, %d контейнеров",
@@ -55,14 +56,14 @@ class CampusRouter:
         logger.debug("Граф кампуса построен")
 
     def get_locations(self) -> list[UserLocation]:
-        """Возвращает список всех доступных локаций кампуса."""
+        """Возвращает список локаций кампуса доступных пользователю."""
         return [
             UserLocation(
                 node_id=node_id,
                 display_name=data["display"],
                 coordinates=data.get("coords"),
             )
-            for node_id, data in self._nodes.items()
+            for node_id, data in self._user_nodes.items()
         ]
 
     def find_containers(self, waste_type: WasteType) -> list[Container]:

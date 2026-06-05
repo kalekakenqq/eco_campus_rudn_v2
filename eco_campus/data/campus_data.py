@@ -68,11 +68,18 @@ CAMPUS_NODES: dict[str, dict] = {
         "display": "Корпус ФИИ (Подольское ш., 8с5)",
         "coords": Coordinates(55.7145, 37.6243),
     },
+}
+
+# Служебные узлы (не показываются пользователю как локации)
+_INTERNAL_NODES: dict[str, dict] = {
     "eco_fii_podolsk": {
         "display": "Экопункт у ФИИ (Подольское ш.)",
         "coords": Coordinates(55.7148, 37.6250),
     },
 }
+
+# Объединяем для построения графа
+CAMPUS_NODES_ALL = {**CAMPUS_NODES, **_INTERNAL_NODES}
 
 CAMPUS_EDGES: list[tuple[str, str, float]] = [
     # Основной кампус
