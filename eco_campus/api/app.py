@@ -49,13 +49,43 @@ def _open_browser() -> None:
     webbrowser.open("http://127.0.0.1:8000")
 
 
+def _run_bot_in_thread() -> None:
+    """Запускает Telegram-бота в отдельном потоке с собственным event loop."""
+    import asyncio
+    import os
+
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        logger.warning("TELEGRAM_BOT_TOKEN не задан — Telegram-бот не запущен")
+        return
+
+    logger.info("Запуск Telegram-бота в фоновом потоке...")
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        from eco_campus.bot.telegram_bot import run_bot
+        run_bot()
+    except Exception:
+        logger.exception("Telegram-бот упал с ошибкой")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # type: ignore[type-arg]
     global _router
     logger.info("Запуск EcoCampus API...")
     _router = CampusRouter()
     logger.info("API готов к работе")
-    threading.Thread(target=_open_browser, daemon=True).start()
+
+    # Открываем браузер только при локальном запуске
+    import os
+    if not os.environ.get("PORT"):
+        threading.Thread(target=_open_browser, daemon=True).start()
+
+    # Запускаем Telegram-бота в отдельном потоке
+    bot_thread = threading.Thread(target=_run_bot_in_thread, daemon=True, name="telegram-bot")
+    bot_thread.start()
+    logger.info("Поток Telegram-бота запущен (id=%s)", bot_thread.ident)
+
     yield
     logger.info("Завершение работы API")
 
