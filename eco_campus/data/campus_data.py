@@ -1,13 +1,16 @@
 """
 База данных узлов графа и контейнеров кампуса РУДН.
 
-Координаты зданий основаны на реальном расположении объектов
-на улице Миклухо-Маклая, Москва (55.6519, 37.4825).
+Координаты зданий основаны на реальном расположении объектов.
+Основной кампус: ул. Миклухо-Маклая, 6 (55.6492, 37.4843)
+Корпус ФИИ-1: Подольское ш., 8с5 (55.6891, 37.6102)
+Корпус ФИИ-2: Ленинский пр., 95 (55.6612, 37.5234)
 """
 
 from eco_campus.core.models import Container, Coordinates, WasteType
 
 CAMPUS_NODES: dict[str, dict] = {
+    # ── Основной кампус (Миклухо-Маклая) ──
     "main_entrance": {
         "display": "Главный вход РУДН (Миклухо-Маклая, 6)",
         "coords": Coordinates(55.6492, 37.4843),
@@ -60,13 +63,32 @@ CAMPUS_NODES: dict[str, dict] = {
         "display": "Парк кампуса РУДН",
         "coords": Coordinates(55.6562, 37.4772),
     },
+    # ── Корпуса ФИИ ──
     "fii_building": {
         "display": "Корпус ФИИ (Подольское ш., 8с5)",
         "coords": Coordinates(55.6891, 37.6102),
     },
+    "fii_leninsky": {
+        "display": "Корпус ФИИ (Ленинский пр-т, 95)",
+        "coords": Coordinates(55.6612, 37.5234),
+    },
+    "fii_tulskaya": {
+        "display": "Корпус ФИИ (ул. Тульская)",
+        "coords": Coordinates(55.7198, 37.6298),
+    },
+    # ── Точки сбора (отдельные ноды рядом с корпусами) ──
+    "eco_fii_podolsk": {
+        "display": "Экопункт у ФИИ (Подольское ш.)",
+        "coords": Coordinates(55.6893, 37.6115),
+    },
+    "eco_fii_leninsky": {
+        "display": "Экопункт у ФИИ (Ленинский пр-т)",
+        "coords": Coordinates(55.6615, 37.5245),
+    },
 }
 
 CAMPUS_EDGES: list[tuple[str, str, float]] = [
+    # Основной кампус
     ("main_entrance", "main_building", 100),
     ("main_entrance", "sports_complex", 180),
     ("main_entrance", "library", 150),
@@ -88,7 +110,16 @@ CAMPUS_EDGES: list[tuple[str, str, float]] = [
     ("library", "sports_complex", 100),
     ("sports_complex", "medical_center", 70),
     ("sports_complex", "main_entrance", 180),
+    # Корпуса ФИИ — связаны с основным кампусом
     ("fii_building", "main_entrance", 950),
+    ("fii_leninsky", "main_entrance", 600),
+    ("fii_leninsky", "fii_building", 1200),
+    ("fii_tulskaya", "fii_building", 800),
+    ("fii_tulskaya", "fii_leninsky", 900),
+    # Экопункты ФИИ — отдельные ноды в 150-200м от корпусов
+    ("fii_building", "eco_fii_podolsk", 150),
+    ("fii_leninsky", "eco_fii_leninsky", 120),
+    ("eco_fii_podolsk", "eco_fii_leninsky", 1100),
 ]
 
 CONTAINERS: list[Container] = [
@@ -148,11 +179,20 @@ CONTAINERS: list[Container] = [
     ),
     Container(
         container_id="c07",
-        name="Экопункт у корпуса ФИИ",
-        location_name="fii_building",
-        coordinates=Coordinates(55.6891, 37.6102),
+        name="Экопункт ФИИ (Подольское ш.)",
+        location_name="eco_fii_podolsk",
+        coordinates=Coordinates(55.6893, 37.6115),
         accepted_types=[WasteType.ELECTRONICS, WasteType.PAPER, WasteType.PLASTIC],
         working_hours="09:00-19:00",
-        description="Сбор электронного мусора и батареек (Подольское ш., 8с5)",
+        description="Сбор электронного мусора и батареек — 150м от корпуса ФИИ на Подольском ш., 8с5",
+    ),
+    Container(
+        container_id="c08",
+        name="Экопункт ФИИ (Ленинский пр-т)",
+        location_name="eco_fii_leninsky",
+        coordinates=Coordinates(55.6615, 37.5245),
+        accepted_types=[WasteType.ELECTRONICS, WasteType.PAPER, WasteType.PLASTIC, WasteType.METAL],
+        working_hours="09:00-20:00",
+        description="Раздельный сбор — 120м от корпуса ФИИ на Ленинском проспекте, 95",
     ),
 ]
