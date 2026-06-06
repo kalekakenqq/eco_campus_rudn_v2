@@ -235,25 +235,34 @@ async def _build_and_send_route(
         await query.edit_message_text(f"Внутренняя ошибка: {exc.message}")
         return
 
-    dist = (
-        f"{route.total_distance_meters:.0f} м"
-        if route.total_distance_meters < 1000
-        else f"{route.total_distance_meters / 1000:.1f} км"
-    )
-    steps_text = "\n".join(
-        f"  {i + 1}. {s.instruction}" for i, s in enumerate(route.steps)
-    )
+    # Форматируем расстояние
+    if route.total_distance_meters == 0:
+        dist = "вы уже здесь"
+        time_str = "менее 1 мин"
+    elif route.total_distance_meters < 1000:
+        dist = f"{route.total_distance_meters:.0f} м"
+        time_str = f"~{max(1, int(route.estimated_minutes))} мин"
+    else:
+        dist = f"{route.total_distance_meters / 1000:.1f} км"
+        time_str = f"~{int(route.estimated_minutes)} мин"
+
+    if not route.steps:
+        steps_text = "  Контейнер находится прямо здесь — у вашей локации."
+    else:
+        steps_text = "\n".join(
+            f"  {i + 1}. {s.instruction}" for i, s in enumerate(route.steps)
+        )
     eco_tip = get_tip(wt)
 
     response = (
-        f"Маршрут найден!\n\n"
-        f"Контейнер: {route.target_container.name}\n"
-        f"Принимает: {wt.label()}\n"
-        f"Расстояние: {dist}\n"
-        f"Примерно {route.estimated_minutes:.0f} мин пешком\n"
-        f"Режим работы: {route.target_container.working_hours}\n\n"
-        f"Пошаговый маршрут:\n{steps_text}\n\n"
-        f"Факт: {eco_tip}"
+        f"✅ Маршрут найден!\n\n"
+        f"📦 Контейнер: {route.target_container.name}\n"
+        f"♻️ Принимает: {wt.label()}\n"
+        f"📏 Расстояние: {dist}\n"
+        f"🚶 Время: {time_str} пешком\n"
+        f"🕐 Режим работы: {route.target_container.working_hours}\n\n"
+        f"🗺 Пошаговый маршрут:\n{steps_text}\n\n"
+        f"🌱 Факт: {eco_tip}"
     )
 
     keyboard = [[
@@ -265,8 +274,15 @@ async def _build_and_send_route(
     )
 
 
-def _build_application(token: str):
-    """Собирает Application с хэндлерами."""
+def run_bot() -> None:
+    """Запускает Telegram-бота."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
+        raise EnvironmentError(
+            "Укажите токен бота в переменной окружения TELEGRAM_BOT_TOKEN"
+        )
+
     application = Application.builder().token(token).build()
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("help", cmd_help))
@@ -275,37 +291,7 @@ def _build_application(token: str):
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text)
     )
-    return application
 
-
-async def run_bot_async() -> None:
-    """Запускает бота без signal handlers — для вызова из фонового потока."""
-    import asyncio
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not token:
-        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
-        return
-
-    application = _build_application(token)
-    logger.info("Telegram-бот запущен")
-
-    async with application:
-        await application.start()
-        await application.updater.start_polling(drop_pending_updates=True)
-        # Ждём вечно — пока поток не будет убит вместе с процессом
-        await asyncio.Event().wait()
-
-
-def run_bot() -> None:
-    """Запускает бота в главном потоке (локальный запуск)."""
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not token:
-        logger.error("Переменная TELEGRAM_BOT_TOKEN не задана")
-        raise EnvironmentError(
-            "Укажите токен бота в переменной окружения TELEGRAM_BOT_TOKEN"
-        )
-
-    application = _build_application(token)
     logger.info("Telegram-бот запущен")
     application.run_polling()
 

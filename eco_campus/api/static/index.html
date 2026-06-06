@@ -152,6 +152,8 @@
   .qr-section { text-align: center; padding: 20px 0; }
   .qr-section img { border-radius: var(--r-md); border: 3px solid var(--sage-light); max-width: 200px; box-shadow: var(--shadow-md); }
   .qr-hint { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+  .tg-link { display:inline-flex;align-items:center;gap:8px;background:#229ED9;color:white;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s; }
+  .tg-link:hover { background:#1a7db8; }
 
   .chat-messages { height: 340px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); scroll-behavior: smooth; }
   .msg { max-width: 82%; padding: 10px 14px; border-radius: var(--r-md); font-size: 13px; line-height: 1.55; }
@@ -295,7 +297,7 @@
       <button class="tab" onclick="switchTab('classify',this)"><span class="tab-full">Тип отходов</span><span class="tab-short">Отходы</span></button>
       <button class="tab" onclick="switchTab('points',this)"><span class="tab-full">Экопункты</span><span class="tab-short">Пункты</span></button>
       <button class="tab" onclick="switchTab('stats',this)"><span class="tab-full">Статистика</span><span class="tab-short">Стат.</span></button>
-      <button class="tab" onclick="switchTab('qr',this)"><span class="tab-full">QR-код</span><span class="tab-short">QR</span></button>
+      <button class="tab" onclick="switchTab('qr',this)"><span class="tab-full">Бот и QR</span><span class="tab-short">QR</span></button>
       <button class="tab" onclick="switchTab('chat',this)"><span class="tab-full">Ассистент</span><span class="tab-short">Бот</span></button>
     </div>
 
@@ -401,13 +403,41 @@
     </div>
 
     <div class="tab-pane" id="tab-qr">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🤖 Telegram-бот</div>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:8px 0 16px">
+          <div style="width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#229ED9,#1a7db8);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">🤖</div>
+          <div>
+            <div style="font-size:17px;font-weight:700;color:var(--g700);margin-bottom:4px">@rudn_eco_bot</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:12px">Находит ближайший контейнер и строит маршрут<br>прямо в Telegram — без открытия браузера.</div>
+            <a href="https://t.me/rudn_eco_bot" target="_blank" rel="noopener"
+               style="display:inline-flex;align-items:center;gap:8px;background:#229ED9;color:white;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s"
+               onmouseover="this.style.background='#1a7db8'" onmouseout="this.style.background='#229ED9'">
+              ✈️ Открыть в Telegram
+            </a>
+          </div>
+        </div>
+        <div style="background:var(--sage-light);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--g600);line-height:1.6;border:1px solid var(--g100)">
+          Команды: <code>/start</code> — начать поиск &nbsp;·&nbsp; <code>/containers</code> — все экопункты &nbsp;·&nbsp; <code>/help</code> — справка.<br>
+          Или просто напишите: <em>«старый телефон»</em>, <em>«пластиковая бутылка»</em> — бот сам определит тип отходов.
+        </div>
+      </div>
       <div class="card">
         <div class="card-title">📱 QR-код для быстрого доступа</div>
-        <div class="qr-section">
-          <img src="/qr?url=https://eco-campus-rudn-scalevillain.amvera.io" alt="QR-код EcoCampus">
-          <p class="qr-hint">Распечатайте и разместите у входа в корпус.<br>Студенты смогут открыть сайт за секунду.</p>
+        <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+          <div class="qr-section" style="flex-shrink:0">
+            <img src="/qr?url=https://eco-campus-rudn-scalevillain.amvera.io" alt="QR-код EcoCampus сайт">
+            <p class="qr-hint" style="font-size:11px">Сайт EcoCampus</p>
+          </div>
+          <div class="qr-section" style="flex-shrink:0">
+            <img src="/qr?url=https://t.me/rudn_eco_bot" alt="QR-код Telegram бот">
+            <p class="qr-hint" style="font-size:11px">Telegram-бот</p>
+          </div>
+          <div style="flex:1;min-width:180px;align-self:center">
+            <p class="qr-hint" style="text-align:left;margin-top:0">Распечатайте и разместите у входа в корпус.<br>Студенты откроют сайт или бот за секунду.</p>
+            <button class="btn-outline" style="margin-top:10px" onclick="downloadQR()">⬇ Скачать QR сайта</button>
+          </div>
         </div>
-        <button class="btn-outline" onclick="downloadQR()">Скачать PNG</button>
       </div>
     </div>
 
@@ -478,7 +508,7 @@ function makeRoutePopup(title, subtitle, color) {
 function initMap() {
   if (map) return;
   // attributionControl: false — отключаем стандартный attribution с флагами
-  map = L.map('map', { preferCanvas: true, attributionControl: false }).setView([55.6525, 37.4825], 16);
+  map = L.map('map', { preferCanvas: true, attributionControl: false }).setView([55.6550, 37.4970], 15);
 
   // Добавляем свой attribution без флагов
   L.control.attribution({ prefix: false })
@@ -519,7 +549,21 @@ function initMap() {
 function showRouteOnMap(data) {
   if (!map) initMap();
   if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
-  if (data.steps.length === 0) return;
+  if (data.steps.length === 0) {
+    // Особый случай: старт совпадает с контейнером
+    fetch(API+'/locations').then(r=>r.json()).then(locs => {
+      const startData = locs.find(l => l.node_id === document.getElementById('loc').value);
+      if (!startData || !startData.lat) return;
+      const pt = [startData.lat, startData.lon];
+      routeLayer = L.layerGroup().addTo(map);
+      L.marker(pt, {icon: makeIcon('#2d9e59', '♻️')})
+        .addTo(routeLayer)
+        .bindPopup(makeRoutePopup('Контейнер рядом!', data.container.name, '#2d9e59'), {className: 'eco-popup'})
+        .openPopup();
+      map.setView(pt, 17);
+    });
+    return;
+  }
   fetch(API+'/locations').then(r=>r.json()).then(locs => {
     const startData = locs.find(l => l.node_id === document.getElementById('loc').value);
     if (!startData || !startData.lat) return;
@@ -534,13 +578,13 @@ function showRouteOnMap(data) {
     L.marker(end, {icon: makeIcon('#2d9e59', '♻️')})
       .addTo(routeLayer)
       .bindPopup(makePopup(data.container), {maxWidth: 260, className: 'eco-popup'});
-    map.fitBounds([start, end], {padding:[40,40]});
+    map.fitBounds([start, end], {padding:[50,50], maxZoom:17});
   });
 }
 
 function resetMap() {
   if (routeLayer && map) { map.removeLayer(routeLayer); routeLayer = null; }
-  if (map) map.setView([55.6525, 37.4825], 16);
+  if (map) map.setView([55.6550, 37.4970], 15);
 }
 
 // Кэш запросов — данные хранятся в сессии, не грузим повторно
@@ -618,6 +662,9 @@ async function findRoute() {
     document.getElementById('result').style.display='block';
     document.getElementById('result').scrollIntoView({behavior:'smooth',block:'nearest'});
     showRouteOnMap(data);
+    // Автопереход на карту
+    const mapTab = document.querySelector('[onclick*=\"map\"]');
+    if (mapTab && !mapTab.classList.contains('active')) { mapTab.click(); }
   } catch(e) { err.textContent=e.message; err.style.display='block'; }
   finally { btn.disabled=false; spinner.style.display='none'; label.textContent='Найти маршрут'; }
 }
