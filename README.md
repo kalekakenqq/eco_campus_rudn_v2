@@ -11,21 +11,21 @@
 и сотрудникам находить ближайший экопункт раздельного сбора отходов
 и строит пешеходный маршрут с помощью алгоритма Дейкстры.
 
-🌐 **[Открыть приложение](https://eco-campus-rudn-scalevillain.amvera.io)** &nbsp;·&nbsp; 📖 **[API документация](https://eco-campus-rudn-scalevillain.amvera.io/docs)**
+🌐 **[Открыть приложение](https://eco-campus-rudn-scalevillain.amvera.io)** &nbsp;·&nbsp; 📖 **[API документация](https://eco-campus-rudn-scalevillain.amvera.io/docs)** &nbsp;·&nbsp; 🔐 **[Панель /admin](https://eco-campus-rudn-scalevillain.amvera.io/admin)** &nbsp;·&nbsp; 🤖 **[@rudn_eco_bot](https://t.me/rudn_eco_bot)**
 
 ## Скриншоты
 
-| Главная страница | Построение маршрута |
+| Главная страница с live CO₂ счётчиком | Карта с маршрутом |
 |:---:|:---:|
-| ![Главная](docs/screenshots/01_main.png) | ![Маршрут](docs/screenshots/02_route.png) |
+| ![Главная](docs/screenshots/01_main.png) | ![Карта](docs/screenshots/03_map_zoom.png) |
 
-| Карта экопунктов | Аналитика и CO₂ |
+| Аналитика + тепловая карта 7×24 | Прогноз загруженности (ML) |
 |:---:|:---:|
-| ![Карта](docs/screenshots/03_map_zoom.png) | ![Статистика](docs/screenshots/05_stats.png) |
+| ![Статистика](docs/screenshots/05_stats.png) | ![Тепловая карта](docs/screenshots/07_heatmap.png) |
 
-| Прогноз загруженности (ML) | Эко-ассистент YandexGPT |
+| Эко-паспорт студента | Панель администратора /admin |
 |:---:|:---:|
-| ![Регрессия](docs/screenshots/05b_predict.png) | ![Ассистент](docs/screenshots/06_assistant.png) |
+| ![Паспорт](docs/screenshots/08_passport.png) | ![Admin](docs/screenshots/09_admin.png) |
 
 ## Проблема
 
