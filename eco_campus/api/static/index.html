@@ -283,6 +283,21 @@
         <span class="hero-stat-lbl">Тестов</span>
       </div>
     </div>
+    <div id="hero-co2" style="margin-top:20px;display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);border:1px solid rgba(76,175,125,0.4);border-radius:14px;padding:10px 20px;backdrop-filter:blur(8px)">
+      <span style="font-size:22px">🌱</span>
+      <div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)">CO₂ сэкономлено сегодня</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px">
+          <span id="hero-co2-val" style="font-size:28px;font-weight:700;color:#4caf7d;font-family:var(--mono);transition:all .4s">—</span>
+          <span style="font-size:13px;color:rgba(255,255,255,0.6)">кг CO₂</span>
+        </div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.15);margin:0 4px"></div>
+      <div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)">Маршрутов</div>
+        <div style="font-size:28px;font-weight:700;color:white;font-family:var(--mono);margin-top:2px"><span id="hero-routes-val">—</span></div>
+      </div>
+    </div>
   </div>
   <svg class="hero-wave" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M0 40L1440 40L1440 10C1200 35 900 0 720 15C540 30 240 5 0 20L0 40Z" fill="#f7faf8"/>
@@ -298,6 +313,7 @@
       <button class="tab" onclick="switchTab('points',this)"><span class="tab-full">Экопункты</span><span class="tab-short">Пункты</span></button>
       <button class="tab" onclick="switchTab('stats',this)"><span class="tab-full">Статистика</span><span class="tab-short">Стат.</span></button>
       <button class="tab" onclick="switchTab('qr',this)"><span class="tab-full">Бот и QR</span><span class="tab-short">QR</span></button>
+      <button class="tab" onclick="switchTab('passport',this)"><span class="tab-full">Мой вклад</span><span class="tab-short">Вклад</span></button>
       <button class="tab" onclick="switchTab('chat',this)"><span class="tab-full">Ассистент</span><span class="tab-short">Бот</span></button>
     </div>
 
@@ -438,6 +454,65 @@
             <button class="btn-outline" style="margin-top:10px" onclick="downloadQR()">⬇ Скачать QR сайта</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-passport">
+      <!-- ЭКО-ПАСПОРТ -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🏆 Мой эко-паспорт</div>
+        <div id="passport-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+            <div style="background:var(--sage-light);border-radius:var(--r-md);padding:16px;text-align:center;border:1px solid var(--g100)">
+              <div style="font-size:28px;font-weight:700;color:var(--g700);font-family:var(--mono)" id="pp-routes">0</div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Маршрутов</div>
+            </div>
+            <div style="background:var(--sage-light);border-radius:var(--r-md);padding:16px;text-align:center;border:1px solid var(--g100)">
+              <div style="font-size:28px;font-weight:700;color:var(--g700);font-family:var(--mono)" id="pp-co2">0</div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">кг CO₂</div>
+            </div>
+            <div style="background:var(--sage-light);border-radius:var(--r-md);padding:16px;text-align:center;border:1px solid var(--g100)">
+              <div style="font-size:28px;font-weight:700;color:var(--g700);font-family:var(--mono)" id="pp-days">0</div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Дней активности</div>
+            </div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;font-weight:600;color:var(--g700);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Любимый тип отходов</div>
+            <div id="pp-top-waste" style="font-size:14px;color:var(--muted)">Пока нет данных — постройте первый маршрут</div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;font-weight:600;color:var(--g700);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">История последних маршрутов</div>
+            <div id="pp-history" style="font-size:13px;color:var(--muted)">Пока пусто</div>
+          </div>
+          <!-- Значок -->
+          <div id="pp-badge-wrap" style="display:none;background:linear-gradient(135deg,#0f3d22,#2d9e59);border-radius:var(--r-lg);padding:20px;text-align:center;color:white;margin-bottom:16px">
+            <div style="font-size:48px;margin-bottom:8px" id="pp-badge-icon">🌱</div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="pp-badge-title">Эко-новичок</div>
+            <div style="font-size:12px;opacity:.75" id="pp-badge-sub">EcoCampus РУДН</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-outline" onclick="exportPassport()" style="font-size:13px">⬇ Скачать паспорт</button>
+            <button class="btn-outline" onclick="resetPassport()" style="font-size:12px;opacity:.6">Сбросить</button>
+          </div>
+        </div>
+      </div>
+      <!-- API для разработчиков -->
+      <div class="card">
+        <div class="card-title">🔌 API для разработчиков</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          EcoCampus предоставляет открытый REST API. Другой кампус может интегрировать навигацию за 5 минут — просто заменив данные в <code>campus_data.py</code>.
+        </div>
+        <div style="background:#1a1a2e;border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px;font-family:var(--mono);font-size:12px;color:#4caf7d;line-height:2;overflow-x:auto">
+          <div><span style="color:#888">GET</span> /route?from_location=main_entrance&waste_type=plastic</div>
+          <div><span style="color:#888">GET</span> /classify?text=старый+телефон</div>
+          <div><span style="color:#888">GET</span> /predict/load?hour=14</div>
+          <div><span style="color:#888">GET</span> /stats</div>
+          <div><span style="color:#888">POST</span> /chat  <span style="color:#555">{"message": "..."}</span></div>
+        </div>
+        <a href="/docs" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--g700);color:white;border-radius:var(--r-md);padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none">
+          📖 Открыть Swagger UI
+        </a>
+        <span style="font-size:12px;color:var(--muted);margin-left:12px">Интерактивная документация</span>
       </div>
     </div>
 
@@ -665,6 +740,12 @@ async function findRoute() {
     // Автопереход на карту
     const mapTab = document.querySelector('[onclick*=\"map\"]');
     if (mapTab && !mapTab.classList.contains('active')) { mapTab.click(); }
+    // Записываем в паспорт
+    const wasteSel = document.getElementById('waste');
+    const wasteName = wasteSel.options[wasteSel.selectedIndex]?.text || waste;
+    recordPassportRoute(wasteName, data.container.name, data.total_distance_meters);
+    // Обновляем hero CO₂
+    updateHeroCo2();
   } catch(e) { err.textContent=e.message; err.style.display='block'; }
   finally { btn.disabled=false; spinner.style.display='none'; label.textContent='Найти маршрут'; }
 }
@@ -871,6 +952,145 @@ init();
 setInterval(() => {
   fetch(API + '/api').catch(() => {});
 }, 4 * 60 * 1000);
+
+
+// ══════════════════════════════════════════════
+// ЭКО-ПАСПОРТ: localStorage хранилище
+// ══════════════════════════════════════════════
+const PASSPORT_KEY = 'ecocampus_passport_v1';
+
+function loadPassport() {
+  try {
+    return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || {
+      routes: 0, co2: 0, history: [], days: new Set(), topWaste: {}
+    };
+  } catch { return { routes: 0, co2: 0, history: [], days: new Set(), topWaste: {} }; }
+}
+
+function savePassport(p) {
+  // Set не сериализуется — конвертируем
+  const toSave = { ...p, days: [...(p.days instanceof Set ? p.days : new Set(p.days))] };
+  localStorage.setItem(PASSPORT_KEY, JSON.stringify(toSave));
+}
+
+function recordPassportRoute(wasteName, containerName, distance) {
+  const p = loadPassport();
+  p.routes = (p.routes || 0) + 1;
+  p.co2 = +((p.co2 || 0) + 0.75).toFixed(2);
+  const today = new Date().toISOString().slice(0,10);
+  const days = new Set(p.days || []);
+  days.add(today);
+  p.days = [...days];
+  p.history = [{ waste: wasteName, container: containerName, dist: distance, date: today }, ...(p.history||[])].slice(0, 10);
+  p.topWaste = p.topWaste || {};
+  p.topWaste[wasteName] = (p.topWaste[wasteName] || 0) + 1;
+  savePassport(p);
+  renderPassport();
+}
+
+function getBadge(routes) {
+  if (routes >= 50) return { icon: '🏆', title: 'Эко-чемпион РУДН' };
+  if (routes >= 20) return { icon: '🌳', title: 'Эко-активист' };
+  if (routes >= 10) return { icon: '♻️', title: 'Эко-участник' };
+  if (routes >= 3)  return { icon: '🌱', title: 'Эко-новичок' };
+  return null;
+}
+
+function renderPassport() {
+  const p = loadPassport();
+  const days = new Set(p.days || []);
+  document.getElementById('pp-routes').textContent = p.routes || 0;
+  document.getElementById('pp-co2').textContent = (p.co2 || 0).toFixed(2);
+  document.getElementById('pp-days').textContent = days.size;
+
+  // Топ отходов
+  const tw = p.topWaste || {};
+  const sorted = Object.entries(tw).sort((a,b) => b[1]-a[1]);
+  document.getElementById('pp-top-waste').textContent = sorted.length
+    ? `${sorted[0][0]} — ${sorted[0][1]} раз${sorted[0][1] > 1 ? 'а' : ''}`
+    : 'Пока нет данных — постройте первый маршрут';
+
+  // История
+  const hist = (p.history || []).slice(0, 5);
+  document.getElementById('pp-history').innerHTML = hist.length
+    ? hist.map(h => `<div style="padding:6px 0;border-bottom:1px solid var(--g100);font-size:13px"><span style="color:var(--g700);font-weight:500">${h.waste}</span> → ${h.container} <span style="color:var(--muted);font-size:11px">${h.date}</span></div>`).join('')
+    : '<div style="color:var(--muted)">Пока пусто</div>';
+
+  // Значок
+  const badge = getBadge(p.routes || 0);
+  const badgeWrap = document.getElementById('pp-badge-wrap');
+  if (badge) {
+    badgeWrap.style.display = 'block';
+    document.getElementById('pp-badge-icon').textContent = badge.icon;
+    document.getElementById('pp-badge-title').textContent = badge.title;
+    document.getElementById('pp-badge-sub').textContent = `EcoCampus РУДН · ${p.routes} маршрутов · ${(p.co2||0).toFixed(1)} кг CO₂`;
+  } else {
+    badgeWrap.style.display = 'none';
+  }
+}
+
+function exportPassport() {
+  const p = loadPassport();
+  const badge = getBadge(p.routes || 0);
+  const days = new Set(p.days || []);
+  const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<title>Эко-паспорт EcoCampus</title>
+<style>body{font-family:system-ui,sans-serif;background:#f0faf4;display:flex;justify-content:center;padding:40px}
+.card{background:white;border-radius:16px;padding:40px;max-width:480px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+h1{color:#1e6b3c;margin:0 0 4px}
+.sub{color:#666;font-size:14px;margin-bottom:32px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
+.stat{background:#f0faf4;border-radius:10px;padding:14px;text-align:center}
+.sv{font-size:26px;font-weight:700;color:#1e6b3c}
+.sl{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.badge{background:linear-gradient(135deg,#0f3d22,#2d9e59);border-radius:12px;padding:20px;text-align:center;color:white;margin-top:16px}
+.bi{font-size:48px}.bt{font-size:18px;font-weight:700;margin:8px 0 4px}.bs{font-size:12px;opacity:.75}
+.foot{margin-top:24px;font-size:11px;color:#aaa;text-align:center}
+</style></head><body><div class="card">
+<h1>🌿 Эко-паспорт</h1>
+<p class="sub">EcoCampus РУДН · ${new Date().toLocaleDateString('ru-RU')}</p>
+<div class="stats">
+  <div class="stat"><div class="sv">${p.routes||0}</div><div class="sl">Маршрутов</div></div>
+  <div class="stat"><div class="sv">${(p.co2||0).toFixed(1)}</div><div class="sl">кг CO₂</div></div>
+  <div class="stat"><div class="sv">${days.size}</div><div class="sl">Дней</div></div>
+</div>
+${badge ? `<div class="badge"><div class="bi">${badge.icon}</div><div class="bt">${badge.title}</div><div class="bs">EcoCampus РУДН</div></div>` : ''}
+<p class="foot">eco-campus-rudn-scalevillain.amvera.io</p>
+</div></body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'eco_passport.html';
+  a.click();
+}
+
+function resetPassport() {
+  if (confirm('Сбросить все данные паспорта?')) {
+    localStorage.removeItem(PASSPORT_KEY);
+    renderPassport();
+  }
+}
+
+// ══════════════════════════════════════════════
+// REAL-TIME CO₂ в hero: обновляем каждые 30 сек
+// ══════════════════════════════════════════════
+async function updateHeroCo2() {
+  try {
+    const data = await fetch(API+'/stats').then(r=>r.json());
+    const co2 = data.co2_saved_kg ?? (data.total_routes * 0.75);
+    const el = document.getElementById('hero-co2-val');
+    const rv = document.getElementById('hero-routes-val');
+    if (el) { el.textContent = co2.toFixed(2); el.style.textShadow = '0 0 12px rgba(76,175,125,0.6)'; setTimeout(()=>el.style.textShadow='',800); }
+    if (rv) rv.textContent = data.total_routes;
+  } catch {}
+}
+
+// Вызываем при старте и каждые 30 сек
+document.addEventListener('DOMContentLoaded', () => {
+  updateHeroCo2();
+  setInterval(updateHeroCo2, 30000);
+  renderPassport();
+});
 </script>
 </body>
 </html>
