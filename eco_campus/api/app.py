@@ -411,6 +411,38 @@ def admin_panel(_: str = Depends(_check_auth)) -> Response:
         for i, w in enumerate(_waste)
     )
 
+    # Рейтинг корпусов — берём из location_counter и маппим на display-имена
+    from eco_campus.data.campus_data import CAMPUS_NODES
+    _loc_raw = stats_service.location_counter.most_common()
+    _medals = ["🥇", "🥈", "🥉"]
+    _loc_colors = ["#2d9e59", "#4caf7d", "#86efac"]
+
+    if _loc_raw:
+        _loc_max = max(c for _, c in _loc_raw) or 1
+        location_rows = "".join(
+            "<tr>"
+            "<td style='font-size:18px;text-align:center'>{}</td>"
+            "<td style='font-weight:{}'>{}  <span style='font-size:11px;color:#888;font-weight:400'>({})</span></td>"
+            "<td><div style='display:flex;align-items:center;gap:8px'>"
+            "<div style='width:{}px;height:10px;background:{};border-radius:5px'></div>"
+            "<span style='font-size:13px;font-weight:600;color:#1e6b3c'>{}</span>"
+            "</div></td>"
+            "<td style='font-size:12px;color:#888'>{:.1f} кг CO₂</td>"
+            "</tr>".format(
+                _medals[i] if i < 3 else str(i+1),
+                "700" if i == 0 else "400",
+                CAMPUS_NODES.get(loc_id, {}).get("display", loc_id),
+                loc_id,
+                int(cnt / _loc_max * 180),
+                _loc_colors[i] if i < 3 else "#c8e6c9",
+                cnt,
+                cnt * 0.75,
+            )
+            for i, (loc_id, cnt) in enumerate(_loc_raw[:7])
+        )
+    else:
+        location_rows = "<tr><td colspan='4' style='color:#888;font-size:13px;padding:16px'>Пока нет данных — постройте первый маршрут</td></tr>"
+
     forecast_bars = "".join(
         f"<div style='display:flex;align-items:center;gap:8px;margin-bottom:4px'>"
         f"<span style='width:36px;font-size:11px;color:#666'>{h['hour']:02d}:00</span>"
@@ -510,6 +542,23 @@ def admin_panel(_: str = Depends(_check_auth)) -> Response:
     <div class="section">
       <div class="section-title">📊 Топ типов отходов</div>
       {"<table><thead><tr><th>#</th><th>Тип отходов</th><th>Частота</th><th>Запросов</th></tr></thead><tbody>" + top_waste_rows + "</tbody></table>" if top_waste_rows else "<p style='color:#888;font-size:13px'>Пока нет данных — маршруты не строились</p>"}
+    </div>
+
+    <!-- Рейтинг корпусов -->
+    <div class="section">
+      <div class="section-title">🏆 Рейтинг корпусов по эко-активности</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Корпус / локация</th>
+            <th>Активность</th>
+            <th>CO₂ сэкономлено</th>
+          </tr>
+        </thead>
+        <tbody>{location_rows}</tbody>
+      </table>
+      <p style="font-size:11px;color:#aaa;margin-top:10px">Данные за текущую сессию · обновляются в реальном времени</p>
     </div>
 
     <!-- Прогноз загруженности -->
