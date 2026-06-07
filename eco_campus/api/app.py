@@ -402,12 +402,13 @@ def admin_panel(_: str = Depends(_check_auth)) -> Response:
     co2 = stats_service.co2_saved_kg()
     trees = round(co2 / 21, 2)
 
+    _total = max(1, stats.get("total_routes", 1))
+    _waste = stats.get("top_waste_types", [])
     top_waste_rows = "".join(
-        f"<tr><td>{i+1}</td><td>{w['waste_type']}</td>"
-        f"<td><div style='width:{int(w['count']/max(1,stats["total_routes"])*200)}px;"
-        f"height:8px;background:#2d9e59;border-radius:4px'></div></td>"
-        f"<td>{w['count']}</td></tr>"
-        for i, w in enumerate(stats.get("top_waste_types", []))
+        "<tr><td>{}</td><td>{}</td>"
+        "<td><div style='width:{}px;height:8px;background:#2d9e59;border-radius:4px'></div></td>"
+        "<td>{}</td></tr>".format(i+1, w["waste_type"], int(w["count"]/_total*200), w["count"])
+        for i, w in enumerate(_waste)
     )
 
     forecast_bars = "".join(
