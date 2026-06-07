@@ -3,7 +3,7 @@
 ![CI](https://github.com/kalekakenqq/eco_campus_rudn_v2/actions/workflows/tests.yml/badge.svg?branch=main)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-105%20passed-brightgreen)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)
 ![Keywords](https://img.shields.io/badge/keywords-1007-green)
 
