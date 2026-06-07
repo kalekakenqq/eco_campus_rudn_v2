@@ -313,6 +313,25 @@
 </div>
 
 <div class="wrap">
+  <!-- ЖИВОЙ ПУЛЬС КАМПУСА -->
+  <div id="pulse-bar" style="background:white;border-radius:14px;border:1px solid var(--g100);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 1px 6px rgba(0,0,0,0.04)">
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div style="position:relative;width:10px;height:10px">
+        <span style="position:absolute;inset:0;border-radius:50%;background:#2d9e59;animation:pulse 2s infinite"></span>
+        <span style="position:absolute;inset:0;border-radius:50%;background:#2d9e59"></span>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:var(--g700);text-transform:uppercase;letter-spacing:.06em">Прямо сейчас</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:220px">
+      <span style="font-size:22px;font-weight:700;color:var(--g700);font-family:var(--mono)" id="pulse-count">—</span>
+      <span style="font-size:13px;color:var(--muted)">чел. у экопунктов кампуса</span>
+    </div>
+    <div id="pulse-dots" style="display:flex;gap:5px;align-items:center"></div>
+    <div style="font-size:12px;color:var(--muted);flex-shrink:0">
+      <span id="pulse-label" style="padding:3px 10px;border-radius:20px;background:var(--sage-light);border:1px solid var(--g100);color:var(--g700);font-weight:500"></span>
+      <span style="margin-left:8px;opacity:.6" id="pulse-time"></span>
+    </div>
+  </div>
   <div class="content-area">
     <div class="nav-tabs">
       <button class="tab active" onclick="switchTab('route',this)"><span class="tab-full">Маршрут</span><span class="tab-short">Маршрут</span></button>
@@ -1223,6 +1242,76 @@ function renderHeatmap() {
 // renderHeatmap вызывается из оригинальной loadStats напрямую (см. ниже)
 
 
+
+
+// ══════════════════════════════════════════════
+// ЖИВОЙ ПУЛЬС КАМПУСА
+// Берём текущую нагрузку из predict/load по часу дня
+// ══════════════════════════════════════════════
+const PULSE_COLORS = {
+  'Свободно':  { bg: '#dcfce7', dot: '#4ade80', text: 'var(--g700)' },
+  'Умеренно':  { bg: '#fef9c3', dot: '#eab308', text: '#713f12' },
+  'Оживлённо': { bg: '#ffedd5', dot: '#f97316', text: '#7c2d12' },
+  'Пик':       { bg: '#fee2e2', dot: '#ef4444', text: '#7f1d1d' },
+};
+
+async function updatePulse() {
+  try {
+    const now = new Date();
+    const hour = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+
+    const pred = await fetch(API + `/predict/load?hour=${hour}`).then(r => r.json());
+    const current = pred.current;
+    const count = Math.round(current.load);
+    const label = current.label;
+    const colors = PULSE_COLORS[label] || PULSE_COLORS['Свободно'];
+
+    // Число людей
+    const countEl = document.getElementById('pulse-count');
+    if (countEl) countEl.textContent = count;
+
+    // Значок статуса
+    const labelEl = document.getElementById('pulse-label');
+    if (labelEl) {
+      labelEl.textContent = label;
+      labelEl.style.background = colors.bg;
+      labelEl.style.color = colors.text;
+      labelEl.style.borderColor = colors.dot + '44';
+    }
+
+    // Время
+    const timeEl = document.getElementById('pulse-time');
+    if (timeEl) timeEl.textContent = `${hour}:${minutes}`;
+
+    // Анимированные точки — количество = count / 2 (макс 12)
+    const dotsEl = document.getElementById('pulse-dots');
+    if (dotsEl) {
+      const dotCount = Math.min(Math.max(1, Math.round(count / 2)), 12);
+      dotsEl.innerHTML = Array.from({ length: dotCount }, (_, i) =>
+        `<span style="
+          width:8px;height:8px;border-radius:50%;
+          background:${colors.dot};
+          display:inline-block;
+          animation:pulse-dot ${0.8 + i * 0.12}s ease-in-out infinite;
+          animation-delay:${i * 0.08}s;
+          opacity:${0.5 + (i / dotCount) * 0.5}
+        "></span>`
+      ).join('');
+    }
+
+  } catch (e) {
+    // Если API недоступен — скрываем пульс-бар
+    const bar = document.getElementById('pulse-bar');
+    if (bar) bar.style.display = 'none';
+  }
+}
+
+// Запускаем сразу и обновляем каждую минуту
+document.addEventListener('DOMContentLoaded', () => {
+  updatePulse();
+  setInterval(updatePulse, 60000);
+});
 </script>
 </body>
 </html>
