@@ -307,12 +307,6 @@
       </div>
     </div>
   </div>
-  <div style="margin-top:16px">
-    <button id="demo-tour-btn" onclick="startDemoTour()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:9px 20px;font-size:13px;font-weight:600;color:white;cursor:pointer;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
-      ▶ Запустить демо-тур
-    </button>
-    <span style="font-size:11px;color:rgba(255,255,255,0.45);margin-left:10px">Автоматический показ всех функций за 12 секунд</span>
-  </div>
   <svg class="hero-wave" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M0 40L1440 40L1440 10C1200 35 900 0 720 15C540 30 240 5 0 20L0 40Z" fill="#f7faf8"/>
   </svg>
@@ -950,6 +944,10 @@ async function loadStats() {
           </span>`
         ).join('');
     } catch(e) { console.error('predict error', e); }
+
+    // Деревья и тепловая карта — вызываем внутри loadStats
+    updateTrees(co2);
+    renderHeatmap();
   } catch(e) { console.error(e); }
 }
 
@@ -1222,98 +1220,9 @@ function renderHeatmap() {
 }
 
 // Вызываем при загрузке статистики
-const _origLoadStats = loadStats;
-async function loadStats() {
-  await _origLoadStats();
-  renderHeatmap();
-  // Обновляем деревья в баннере статистики
-  try {
-    const data = await fetch(API+'/stats').then(r=>r.json());
-    const co2 = data.co2_saved_kg ?? (data.total_routes * 0.75);
-    updateTrees(co2);
-    document.getElementById('co2-val').textContent = co2.toFixed(2) + ' кг';
-  } catch {}
-}
+// renderHeatmap вызывается из оригинальной loadStats напрямую (см. ниже)
 
-// ══════════════════════════════════════════════
-// ФИЧА 5: Демо-тур
-// ══════════════════════════════════════════════
-let demoRunning = false;
 
-async function startDemoTour() {
-  if (demoRunning) return;
-  demoRunning = true;
-  const btn = document.getElementById('demo-tour-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Демо-тур идёт...'; }
-
-  const steps = [
-    // 1. Маршрут: главный вход + пластик
-    async () => {
-      switchTabByName('route');
-      await sleep(600);
-      const loc = document.getElementById('loc');
-      const waste = document.getElementById('waste');
-      if (loc) setSelectByText(loc, 'Главный вход');
-      if (waste) setSelectByText(waste, 'Пластик');
-      await sleep(800);
-      await findRoute();
-      await sleep(2500);
-    },
-    // 2. Карта
-    async () => {
-      switchTabByName('map');
-      await sleep(2000);
-    },
-    // 3. Классификатор
-    async () => {
-      switchTabByName('classify');
-      await sleep(600);
-      const inp = document.getElementById('classify-input');
-      if (inp) { inp.value = ''; await typeWriter(inp, 'сломанный ноутбук', 60); }
-      await sleep(400);
-      await classifyWaste();
-      await sleep(2000);
-    },
-    // 4. Статистика
-    async () => {
-      switchTabByName('stats');
-      await sleep(2500);
-    },
-    // 5. Мой вклад
-    async () => {
-      switchTabByName('passport');
-      await sleep(2000);
-    },
-    // 6. Возврат на маршрут
-    async () => {
-      switchTabByName('route');
-      if (btn) { btn.disabled = false; btn.textContent = '▶ Запустить демо-тур'; }
-      demoRunning = false;
-    },
-  ];
-
-  for (const step of steps) { await step(); }
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function switchTabByName(name) {
-  const btn = document.querySelector(`[onclick*="'${name}'"]`);
-  if (btn) btn.click();
-}
-
-function setSelectByText(sel, text) {
-  for (const opt of sel.options) {
-    if (opt.text.toLowerCase().includes(text.toLowerCase())) {
-      sel.value = opt.value; break;
-    }
-  }
-}
-
-async function typeWriter(el, text, delay) {
-  el.value = '';
-  for (const ch of text) { el.value += ch; await sleep(delay); }
-}
 </script>
 </body>
 </html>
