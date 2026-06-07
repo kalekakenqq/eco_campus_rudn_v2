@@ -624,36 +624,41 @@ function initMap() {
 function showRouteOnMap(data) {
   if (!map) initMap();
   if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
-  if (data.steps.length === 0) {
-    // Особый случай: старт совпадает с контейнером
-    fetch(API+'/locations').then(r=>r.json()).then(locs => {
-      const startData = locs.find(l => l.node_id === document.getElementById('loc').value);
-      if (!startData || !startData.lat) return;
-      const pt = [startData.lat, startData.lon];
-      routeLayer = L.layerGroup().addTo(map);
-      L.marker(pt, {icon: makeIcon('#2d9e59', '♻️')})
-        .addTo(routeLayer)
-        .bindPopup(makeRoutePopup('Контейнер рядом!', data.container.name, '#2d9e59'), {className: 'eco-popup'})
-        .openPopup();
-      map.setView(pt, 17);
-    });
-    return;
-  }
+
   fetch(API+'/locations').then(r=>r.json()).then(locs => {
     const startData = locs.find(l => l.node_id === document.getElementById('loc').value);
     if (!startData || !startData.lat) return;
+
     const start = [startData.lat, startData.lon];
-    const end = [data.container.lat, data.container.lon];
+    const end   = [data.container.lat, data.container.lon];
+    const dist  = data.total_distance_meters || 0;
+
     routeLayer = L.layerGroup().addTo(map);
-    L.polyline([start, end], {color:'#1e6b3c', weight:4, opacity:0.8, dashArray:'8 6'}).addTo(routeLayer);
+
+    // Всегда рисуем линию старт → контейнер
+    L.polyline([start, end], {
+      color: '#1e6b3c', weight: 4, opacity: 0.85,
+      dashArray: dist < 100 ? '4 4' : '10 6'
+    }).addTo(routeLayer);
+
+    // Маркер старта
     L.marker(start, {icon: makeIcon('#dc2626', '📍')})
       .addTo(routeLayer)
       .bindPopup(makeRoutePopup('Вы здесь', 'Стартовая точка', '#dc2626'), {className: 'eco-popup'})
       .openPopup();
+
+    // Маркер контейнера
     L.marker(end, {icon: makeIcon('#2d9e59', '♻️')})
       .addTo(routeLayer)
       .bindPopup(makePopup(data.container), {maxWidth: 260, className: 'eco-popup'});
-    map.fitBounds([start, end], {padding:[50,50], maxZoom:17});
+
+    // Если очень близко (< 100м) — фиксированный зум 18, иначе fitBounds
+    if (dist < 100) {
+      const mid = [(start[0]+end[0])/2, (start[1]+end[1])/2];
+      map.setView(mid, 18);
+    } else {
+      map.fitBounds([start, end], {padding:[60,60], maxZoom:17});
+    }
   });
 }
 
