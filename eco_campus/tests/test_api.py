@@ -172,3 +172,29 @@ class TestEcoTipEndpoint:
             data = client.get("/eco-tip?waste_type=plastic").json()
             tips.add(data["tip"])
         assert len(tips) > 1
+
+
+# ── Тесты /admin панели ──────────────────────────────────────────
+
+def test_admin_no_auth(client: TestClient) -> None:
+    """Без авторизации /admin возвращает 401."""
+    resp = client.get("/admin")
+    assert resp.status_code == 401
+
+
+def test_admin_wrong_password(client: TestClient) -> None:
+    """Неверный пароль — 401."""
+    resp = client.get("/admin", auth=("admin", "wrong"))
+    assert resp.status_code == 401
+
+
+def test_admin_ok(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Верные учётные данные — 200 и HTML с ключевыми элементами."""
+    import eco_campus.api.app as app_module
+    monkeypatch.setattr(app_module, "ADMIN_USER", "admin")
+    monkeypatch.setattr(app_module, "ADMIN_PASS", "ecocampus2024")
+    resp = client.get("/admin", auth=("admin", "ecocampus2024"))
+    assert resp.status_code == 200
+    assert "EcoCampus" in resp.text
+    assert "Панель администратора" in resp.text
+    assert "CO" in resp.text
